@@ -1,52 +1,83 @@
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class Position {
-	private int[] boardmatrix;
-	private boolean isCheck4Black;
-	private boolean isCheck4White;
-	private boolean isCheckmate4Black;
-	private boolean isCheckmate4White;
-	private boolean isWhiteOn;
-	
+	private byte[] boardmatrix;
 
-	public Position(int[] boardmatrix, boolean isWhiteOn) {
+	public Position(byte[] boardmatrix) {
 		this.boardmatrix = boardmatrix;
-		this.isWhiteOn = isWhiteOn;
-		if (isWhiteOn) this.calcCheckWhite(); else this.calcCheckBlack(); 
 	}
 	
-	public boolean isWhiteOn () {
-		return isWhiteOn;
+	public boolean isCheckForFoe(boolean amIWhite) {
+		boolean isit = false; 
+		//Loop over Black or White?
+		int myFigures;
+		if (amIWhite) myFigures = Consts.whiteFigure; else myFigures = Consts.blackFigure;
+		//loop over board to find all my figures
+		Figure myFigure = null;
+		int myFigureNo;
+		for (int i=0; i<=Consts.fullMatrixSize; i++) {
+			if (this.getFieldValue(i) == myFigures) {
+				myFigureNo = this.whoIsOnField(i);
+				switch (myFigureNo) {
+					case Consts.bauerNumber: myFigure = new Bauer(this,i,amIWhite);
+					case Consts.laeuferNumber: myFigure = new Laeufer(this,i,amIWhite);
+					/*case Consts.springerNumber: myFigure = new Springer(this,i,forWhite);
+					case Consts.turmNumber: myFigure = new Turm(this,i,forWhite);
+					case Consts.dameNumber: myFigure = new Dame(this,i,forWhite);
+					case Consts.koenigNumber: myFigure = new Koenig(this,i,forWhite);*/
+				}
+				if (myFigure.makesCheck()) { isit = true; break; }
+			}
+		}
+		return isit;
 	}
 	
-	public boolean isCheck () {
-		if (isWhiteOn && isCheck4White) return true;
-		else if (!isWhiteOn && isCheck4Black) return true;
-		else return false;
+	public List<Move> getAllMoves (boolean amIWhite) {
+		List<Move> moves = new ArrayList<Move>(); 
+		//Loop over Black or White?
+		int myFigures;
+		if (amIWhite) myFigures = Consts.whiteFigure; else myFigures = Consts.blackFigure;
+		//loop over board to find all myfigures
+		Figure myFigure = null;
+		Move newmove = null;
+		int myFigureNo;
+		for (int i=0; i<=Consts.fullMatrixSize; i++) {
+			if (this.getFieldValue(i) == myFigures) {
+				myFigureNo = this.whoIsOnField(i);
+				switch (myFigureNo) {
+					case Consts.bauerNumber: myFigure = new Bauer(this,i,amIWhite);
+					case Consts.laeuferNumber: myFigure = new Laeufer(this,i,amIWhite);
+					/*case Consts.springerNumber: foeFigure = new Springer(i,this);
+					case Consts.turmNumber: foeFigure = new Turm(i,this);
+					case Consts.dameNumber: foeFigure = new Dame(i,this);
+					case Consts.koenigNumber: foeFigure = new Koenig(i,this);*/
+					default: myFigure = new Bauer(this,i,amIWhite);
+				}
+				while (myFigure.hasNextStep()) {
+					newmove = new Move(this,myFigure.whoAmI(),myFigure.whereAmI(),myFigure.getNextStep());
+					if (!newmove.isCheckForMe(amIWhite)) moves.add(newmove);
+				}
+			}
+		}
+		return moves;		
 	}
 	
-	public boolean isCheckmate () {
-		if (isWhiteOn && isCheckmate4White) return true;
-		else if (!isWhiteOn && isCheckmate4Black) return true;
-		else return false;
-	}
-
-	
-	private void calcCheckWhite () {
-		 this.isCheck4White = false;
-		 this.isCheckmate4White = false;
-		 this.isCheck4Black = false;
-		 this.isCheckmate4Black = false;
+	public byte[] getBoardmatrix () {
+		return boardmatrix;
 	}
 	
-	private void calcCheckBlack () {
-		 this.isCheck4Black = false;
-		 this.isCheckmate4Black = false;
-		 this.isCheck4White = false;
-		 this.isCheckmate4White = false;
+	public void setBoardmatrix (byte[] matrix) {
+		boardmatrix = matrix;
 	}
 	
-	public int getFieldValue (int pos) {
+	public byte getFieldValue (int pos) {
 		return boardmatrix[pos];
+	}
+	
+	public void setFieldValue (int pos, byte value) {
+		boardmatrix[pos] = value;
 	}
 	
 	//returns -1 or +1 if any figure is on field
@@ -64,36 +95,49 @@ public class Position {
 		return retvalue;
 	}
 	
-	//returns Consts.figureNumer (e.g. Bauernumber)
-	public int whoIsOnField (int pos) {
+	public void setFieldValueAllFields (int pos, byte value) {
 		//relative position on Field
 		int relPos = pos % Consts.oneFigureSize;
-		int retvalue = 0;
 		for (int i=0; i< Consts.countFigures; i++) {
+			boardmatrix[relPos * i] = value;
+		}
+	}
+	
+	//returns Consts.figureNumer (e.g. Bauernumber)
+	public byte whoIsOnField (int pos) {
+		//relative position on Field
+		int relPos = pos % Consts.oneFigureSize;
+		byte retvalue = 0;
+		for (byte i=0; i< Consts.countFigures; i++) {
 			if (boardmatrix[relPos * i] !=0) {
-				retvalue = i+1;
+				retvalue = (byte) (1 + i);
 				break;
 			}
 		}
 		return retvalue;
 	}
 	
-	public boolean isFieldBlockedByOwn(int stepPos) {
-		if (this.isWhiteOn)
+	public boolean isFieldBlocked(boolean isWhite, int stepPos) {
+		if (isWhite)
 			return (getFieldValueAllFields(stepPos)==Consts.whiteFigure);
 		else
 			return (getFieldValueAllFields(stepPos)==Consts.blackFigure);
 	}
 	
-	public boolean isFieldBlockedByFoe(int stepPos) {
-		if (this.isWhiteOn)
-			return (getFieldValueAllFields(stepPos)==Consts.blackFigure);
-		else
-			return (getFieldValueAllFields(stepPos)==Consts.whiteFigure);
+	public boolean isFieldBlockedByOwn(boolean isWhite, int stepPos) {
+		return isFieldBlocked(isWhite,stepPos);
 	}
 	
-	public boolean isFieldBlockedByFoeKing(int stepPos) {
-		return (whoIsOnField(stepPos) == Consts.koenigNumber) && isFieldBlockedByFoe(stepPos);
+	public boolean isFieldBlockedByFoe(boolean isWhite, int stepPos) {
+		return isFieldBlocked(!isWhite,stepPos);
+	}
+	
+	public boolean isFieldBlockedByKing(boolean isWhite, int stepPos) {
+		return (whoIsOnField(stepPos) == Consts.koenigNumber) && isFieldBlocked(isWhite, stepPos);
+	}
+	
+	public boolean isFieldBlockedByKingFoe(boolean isWhite, int stepPos) {
+		return isFieldBlocked(!isWhite,stepPos);
 	}
 	
 	
