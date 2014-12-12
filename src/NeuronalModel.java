@@ -1,3 +1,5 @@
+import java.util.Random;
+
 /**
  * 
  */
@@ -7,6 +9,8 @@
  *
  */
 public class NeuronalModel {
+	
+	private Random randomno = new Random();
 
 	/**
 	 * 
@@ -16,7 +20,8 @@ public class NeuronalModel {
 	}
 	
 	public float willWhiteWin(byte[] boardmatrix) {
-		return (float)0.555;
+		float randomfloat = this.randomno.nextFloat();
+		return randomfloat;
 	}
 	
 

@@ -13,17 +13,11 @@ public class Move {
 	private int startpos;
 	private int targetpos;
 	private byte knockedOff = 0;
-	private boolean isValidMove;
 
 	/**
-	 * @param isWhiteOn
+	 * @param 
 	 */
 	public Move(Position startposition, byte figureType, int startpos, int targetpos) {
-		//Sanity Checks - TO BE EXTENDED
-		if ((startposition.getFieldValue(startpos) != 0) &&
-			(targetpos<=Consts.fullMatrixSize)) this.isValidMove = true;
-		else this.isValidMove=false;
-			
 		byte[] boardmatrix = new byte[Consts.fullMatrixSize+1];
 		System.arraycopy(startposition.getBoardmatrix(), 0, boardmatrix, 0, boardmatrix.length);
 		this.newPosition = new Position(boardmatrix);
@@ -34,6 +28,10 @@ public class Move {
 		this.startpos = startpos;
 		this.figureType = figureType; 
 		this.targetpos = targetpos;
+	}
+	
+	public boolean isCheckForFoe(boolean amIWhite) {
+		return newPosition.isCheckForFoe(amIWhite);
 	}
 	
 	public boolean isCheckForMe(boolean amIWhite) {
@@ -64,7 +62,4 @@ public class Move {
 		return knockedOff;
 	}
 	
-	public boolean isValidMove() {
-		return isValidMove;
-	}
 }

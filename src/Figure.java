@@ -36,7 +36,7 @@ public abstract class Figure {
 	protected void calcSteps() {//to be overwritten by Child-Class ; calcs all possible steps
 		this.stepsCalculated = true;
 	}
-	protected void calcCheck() { //to be overwritten by Child-Clas; sets makesCheck
+	protected void calcCheck() { //to be overwritten by Child-Class; sets makesCheck
 		this.checkCalculated = true;
 	}
 	
