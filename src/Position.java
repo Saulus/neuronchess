@@ -21,12 +21,13 @@ public class Position {
 			if (this.getFieldValue(i) == myFigures) {
 				myFigureNo = this.whoIsOnField(i);
 				switch (myFigureNo) {
-					case Consts.bauerNumber: myFigure = new Bauer(this,i,amIWhite);
-					case Consts.laeuferNumber: myFigure = new Laeufer(this,i,amIWhite);
-					/*case Consts.springerNumber: myFigure = new Springer(this,i,forWhite);
-					case Consts.turmNumber: myFigure = new Turm(this,i,forWhite);
-					case Consts.dameNumber: myFigure = new Dame(this,i,forWhite);
-					case Consts.koenigNumber: myFigure = new Koenig(this,i,forWhite);*/
+					case Consts.bauerNumber: myFigure = new Bauer(this,i,amIWhite);break;
+					case Consts.laeuferNumber: myFigure = new Laeufer(this,i,amIWhite);break;
+					/*case Consts.springerNumber: myFigure = new Springer(this,i,forWhite);break;
+					case Consts.turmNumber: myFigure = new Turm(this,i,forWhite);break;
+					case Consts.dameNumber: myFigure = new Dame(this,i,forWhite);break;
+					case Consts.koenigNumber: myFigure = new Koenig(this,i,forWhite);break;*/
+					default: myFigure = new Bauer(this,i,amIWhite);break;
 				}
 				if (myFigure.makesCheck()) { isit = true; break; }
 			}
@@ -47,13 +48,13 @@ public class Position {
 			if (this.getFieldValue(i) == myFigures) {
 				myFigureNo = this.whoIsOnField(i);
 				switch (myFigureNo) {
-					case Consts.bauerNumber: myFigure = new Bauer(this,i,amIWhite);
-					case Consts.laeuferNumber: myFigure = new Laeufer(this,i,amIWhite);
-					/*case Consts.springerNumber: foeFigure = new Springer(i,this);
-					case Consts.turmNumber: foeFigure = new Turm(i,this);
-					case Consts.dameNumber: foeFigure = new Dame(i,this);
-					case Consts.koenigNumber: foeFigure = new Koenig(i,this);*/
-					default: myFigure = new Bauer(this,i,amIWhite);
+					case Consts.bauerNumber: myFigure = new Bauer(this,i,amIWhite);break;
+					case Consts.laeuferNumber: myFigure = new Laeufer(this,i,amIWhite);break;
+					/*case Consts.springerNumber: foeFigure = new Springer(i,this);break;
+					case Consts.turmNumber: foeFigure = new Turm(i,this);break;
+					case Consts.dameNumber: foeFigure = new Dame(i,this);break;
+					case Consts.koenigNumber: foeFigure = new Koenig(i,this);break;*/
+					default: myFigure = new Bauer(this,i,amIWhite);break;
 				}
 				while (myFigure.hasNextStep()) {
 					newmove = new Move(this,myFigure.whoAmI(),myFigure.whereAmI(),myFigure.getNextStep());
@@ -86,8 +87,8 @@ public class Position {
 		int relPos = pos % Consts.oneFigureSize;
 		int retvalue = 0;
 		for (int i=0; i< Consts.countFigures; i++) {
-			if (boardmatrix[relPos * i] !=0) {
-				retvalue += boardmatrix[relPos * i];
+			if (boardmatrix[relPos +(i*Consts.oneFigureSize)] !=0) {
+				retvalue += boardmatrix[relPos +(i*Consts.oneFigureSize)];
 				break;
 			}
 		}
@@ -99,7 +100,7 @@ public class Position {
 		//relative position on Field
 		int relPos = pos % Consts.oneFigureSize;
 		for (int i=0; i< Consts.countFigures; i++) {
-			boardmatrix[relPos * i] = value;
+			boardmatrix[relPos +(i*Consts.oneFigureSize)] = value;
 		}
 	}
 	
@@ -109,7 +110,7 @@ public class Position {
 		int relPos = pos % Consts.oneFigureSize;
 		byte retvalue = 0;
 		for (byte i=0; i< Consts.countFigures; i++) {
-			if (boardmatrix[relPos * i] !=0) {
+			if (boardmatrix[relPos +(i*Consts.oneFigureSize)] !=0) {
 				retvalue = (byte) (1 + i);
 				break;
 			}

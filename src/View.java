@@ -22,7 +22,7 @@ public class View {
 	
 	// 1= Machine is white, 2= Machine is black, 3 = Machine is both
 	public int decidePlaymode () {
-		System.out.print("Was soll die MACHINE spielen (weiss/schwarz/lerne/e für Ende): ");
+		System.out.print("Was soll die MACHINE spielen - w(eiss) s(chwarz) l(erne) e(nde): ");
 		 String usermove= null;
 		 int ret = 0;
 		 boolean correct = false;
@@ -34,11 +34,11 @@ public class View {
 		         System.exit(1);
 		     }
 			 usermove = usermove.toLowerCase();
-			 correct = ((usermove == "weiss") || (usermove == "schwarz") || (usermove == "lerne") || (usermove == "e"));
+			 correct = ((usermove.equals("w")) || (usermove.equals("s")) || (usermove.equals("l")) || (usermove.equals("e")));
 		 } while (!correct);
-		 if (usermove == "weiss") ret =1;
-		 if (usermove == "schwarz") ret =2;
-		 if (usermove == "lerne") ret =3;
+		 if (usermove.equals("w")) ret =1;
+		 if (usermove.equals("s")) ret =2;
+		 if (usermove.equals("l")) ret =3;
 		 return ret;
 	}
 	
@@ -71,13 +71,13 @@ public class View {
 		         System.out.println("IO error!");
 		         System.exit(1);
 		     }
-			 usermove.replaceAll("\\s","");
-			 usermove.toLowerCase();
+			 usermove = usermove.replaceAll("\\s","");
+			 usermove = usermove.toLowerCase();
 			 if (usermove == "e") isCancel = true;
 			 else {
 				 byte figuretype = Utils.whichFigureType(usermove.substring(0,1));
-				 int oldposition = Utils.whichPosition(usermove.substring(1,3));
-				 int newposition = Utils.whichPosition(usermove.substring(3,5));
+				 int oldposition = Utils.whichPosition(figuretype, usermove.substring(1,3));
+				 int newposition = Utils.whichPosition(figuretype, usermove.substring(3,5));
 				 for (int i=0; i<possibleMoves.size(); i++) {
 						if ((possibleMoves.get(i).getFiguretype() == figuretype) &&
 							(possibleMoves.get(i).getStartpos() == oldposition) &&
@@ -99,6 +99,6 @@ public class View {
 	}
 	
 	public void drawCancel() {
-		System.out.println("Schade, dass Du aufhörst ;-( Komm wieder. ICH MUSS LERNEN.");
+		System.out.println("Schade, dass Du aufhörst. Komm wieder - ICH MUSS LERNEN.");
 	}
 }

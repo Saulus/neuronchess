@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -12,7 +13,7 @@ import java.util.List;
 public class Game {
 	private Player player1;
 	private Player player2;
-	private List<Position> allPositions;
+	private List<Position> allPositions = new ArrayList<Position>();
 	private boolean whiteHasWon;
 	private boolean wasCancelled = false;
 	private View gameView;

@@ -13,7 +13,7 @@ public class NeuronChess {
 	 */
 	public static void main(String[] args) {
 		//0. Read argument: who is on?
-		if (args.length != 1) {
+		if (args.length != 0) {
             System.out.println("Aufruf: java -jar neuronchess.jar");
             System.exit(1);
         }

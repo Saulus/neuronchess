@@ -34,10 +34,10 @@ public final class Consts {
 	public static final String[] startBoard = {"wta1", "wth1", "wsb1","wsg1","wlc1","wlf1","wdd1","wke1",
 					"sta8", "sth8", "ssb8","ssg8","slc8","slf8","sdd8","ske8",
 					"wba2","wbb2","wbc2","wbd2","wbe2","wbf2","wbg2","wbh2",
-					"wba7","wbb7","wbc7","wbd7","wbe7","wbf7","wbg7","wbh7"};
+					"sba7","sbb7","sbc7","sbd7","sbe7","sbf7","sbg7","sbh7"};
 	
-	public static final String[] verticalPositions = {"A","B","C","D","E","F","G","H"};
-	public static final String[] horizontalPositions = {"1","2","3","4","5","6","7","8"};
+	public static final String[] horizontalPositions = {"A","B","C","D","E","F","G","H"};
+	public static final String[] verticalPositions = {"1","2","3","4","5","6","7","8"};
 	
 	public static final float firstChoise = (float) 0.7; // to decide which move to make
 	public static final float secondChoise = (float) 0.2; // to decide which move to make

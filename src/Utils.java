@@ -19,17 +19,19 @@ public final class Utils {
 	 */
 	public final static byte[] buildBoardmatrix(String[] board) {
 		String nextfigure;
+		int figureno=0;
 		int figurepos = 0;
 		boolean isWhite = false;
 		byte[] boardmatrix = new byte[Consts.fullMatrixSize+1];
 		for (int i=0;i<board.length;i++) {
 			nextfigure = board[i].toLowerCase();
 			switch (nextfigure.charAt(0)) {
-				case 'w': isWhite = true;
-				case 's': isWhite = false;
-				case 'b': isWhite = false; //black
+				case 'w': isWhite = true; break;
+				case 's': isWhite = false; break;
+				case 'b': isWhite = false;  break; //black
 			}
-			figurepos = whichPosition(nextfigure.substring(1, 4));
+			figureno = whichFigureType(nextfigure.substring(1,2));
+			figurepos = whichPosition(figureno,nextfigure.substring(2, 4));
 			if (isWhite) boardmatrix[figurepos] = Consts.whiteFigure;
 				else boardmatrix[figurepos] = Consts.blackFigure;
 		}
@@ -39,12 +41,12 @@ public final class Utils {
 	public final static String whichFigure(byte figNo) {
 		String returnval = "";
 		switch (figNo) {
-			case Consts.bauerNumber: returnval = "B";
-			case Consts.laeuferNumber: returnval = "L";
-			case Consts.springerNumber: returnval = "S";
-			case Consts.turmNumber: returnval = "T";
-			case Consts.dameNumber: returnval = "D";
-			case Consts.koenigNumber: returnval = "K";
+			case Consts.bauerNumber: returnval = "B";break;
+			case Consts.laeuferNumber: returnval = "L";break;
+			case Consts.springerNumber: returnval = "S";break;
+			case Consts.turmNumber: returnval = "T";break;
+			case Consts.dameNumber: returnval = "D";break;
+			case Consts.koenigNumber: returnval = "K";break;
 		}
 		return returnval;
 	}
@@ -53,59 +55,49 @@ public final class Utils {
 		int relPos = pos % Consts.oneFigureSize;
 		int horizontal = relPos % 8;
 		int vertical = (relPos - horizontal)/8;
-		String returnval = Consts.verticalPositions[vertical] + Consts.horizontalPositions[horizontal];
+		String returnval = Consts.horizontalPositions[horizontal] + Consts.verticalPositions[vertical];
 		return returnval;
 	}
 	
 	public final static byte whichFigureType(String figure) {
 		byte figureType = 0;
 		switch (figure.toLowerCase().charAt(0)) {
-			case 'b': figureType = Consts.bauerNumber;
-			case 'l': figureType = Consts.laeuferNumber;
-			case 's': figureType = Consts.springerNumber;
-			case 'p': figureType = Consts.springerNumber; //Pferd statt Springer
-			case 't': figureType = Consts.turmNumber;
-			case 'd': figureType = Consts.dameNumber;
-			case 'k': figureType = Consts.koenigNumber;
+			case 'b': figureType = Consts.bauerNumber;break;
+			case 'l': figureType = Consts.laeuferNumber;break;
+			case 's': figureType = Consts.springerNumber;break;
+			case 'p': figureType = Consts.springerNumber; break;//Pferd statt Springer
+			case 't': figureType = Consts.turmNumber;break;
+			case 'd': figureType = Consts.dameNumber;break;
+			case 'k': figureType = Consts.koenigNumber;break;
 		}
 		return figureType;
 	}
 	
-	public final static int whichPosition(String place) {
+	public final static int whichPosition(int figureno, String place) {
 		int vertical = 0;
 		int horizontal = 0;
 		int figurepos = 0;
-		int figureStart = 0;
 		switch (place.toLowerCase().charAt(0)) {
-			case 'b': figureStart = Consts.bauerStart;
-			case 'l': figureStart = Consts.laeuferStart;
-			case 's': figureStart = Consts.springerStart;
-			case 'p': figureStart = Consts.springerStart; //Pferd statt Springer
-			case 't': figureStart = Consts.turmStart;
-			case 'd': figureStart = Consts.dameStart;
-			case 'k': figureStart = Consts.koenigStart;
+			case 'a': horizontal = 0;break;
+			case 'b': horizontal = 1;break;
+			case 'c': horizontal = 2;break;
+			case 'd': horizontal = 3;break;
+			case 'e': horizontal = 4;break;
+			case 'f': horizontal = 5;break;
+			case 'g': horizontal = 6;break;
+			case 'h': horizontal = 7;break;
 		}
 		switch (place.toLowerCase().charAt(1)) {
-			case 'a': vertical = 0;
-			case 'b': vertical = 1;
-			case 'c': vertical = 2;
-			case 'd': vertical = 3;
-			case 'e': vertical = 4;
-			case 'f': vertical = 5;
-			case 'g': vertical = 6;
-			case 'h': vertical = 7;
+			case '1': vertical = 0;break;
+			case '2': vertical = 1;break;
+			case '3': vertical = 2;break;
+			case '4': vertical = 3;break;
+			case '5': vertical = 4;break;
+			case '6': vertical = 5;break;
+			case '7': vertical = 6;break;
+			case '8': vertical = 7;break;
 		}
-		switch (place.toLowerCase().charAt(2)) {
-			case '1': horizontal = 0;
-			case '2': horizontal = 1;
-			case '3': horizontal = 2;
-			case '4': horizontal = 3;
-			case '5': horizontal = 4;
-			case '6': horizontal = 5;
-			case '7': horizontal = 6;
-			case '8': horizontal = 7;
-		}
-		figurepos = vertical*8+horizontal + figureStart;
+		figurepos = vertical*8+horizontal + (figureno -1) * Consts.oneFigureSize;
 		return figurepos;
 	}
 
