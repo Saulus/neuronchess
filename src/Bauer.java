@@ -19,7 +19,6 @@ public class Bauer extends Figure {
 	}
 	
 	@Override
-	//TTTTTTTOOOOOOO DOOOOOOOOOOOOOOOOOO: NUR FÜR WEISS - SCHWARZ MUSS RÜCKWÄRTS DENKEN! (Step multiplizieren?)
 	protected void calcSteps() {
 		super.calcSteps();
 		int newstep;

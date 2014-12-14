@@ -22,31 +22,33 @@ public class NeuronChess {
 		NeuronalModel chessmodel = new NeuronalModel();
 		//2. Build new starting position
 		byte[] newboard = Utils.buildBoardmatrix(Consts.startBoard);
-		Position position = new Position(newboard);
-		//3. Create Players and View
+		//3. Create Players, Position and View
 		View gameView = new View();
+		Position position;
 		Player player1 = null;
 		Player player2 = null;
+		Game thisGame;
 		int playmode = 0;
 		boolean wantsToStop = false;
 		do {
 			playmode = gameView.decidePlaymode();
 			if (playmode == 1) {
-				player1 = new MachinePlayer(true,gameView,chessmodel);
-				player2 = new HumanPlayer(false,gameView);
+				player1 = new MachinePlayer(true,gameView,"Uniform Player", chessmodel);
+				player2 = new HumanPlayer(false,gameView,"Human Player");
 			} else if (playmode == 2) {
-				player1 = new HumanPlayer(true,gameView);
-				player2 = new MachinePlayer(false,gameView,chessmodel);
+				player1 = new HumanPlayer(true,gameView,"Human Player");
+				player2 = new MachinePlayer(false,gameView,"Uniform Player",chessmodel);
 			} else  if (playmode == 3) {
-				player1 = new MachinePlayer(true,gameView,chessmodel);
-				player2 = new MachinePlayer(false,gameView,chessmodel);
+				player1 = new MachinePlayer(true,gameView,"Uniform Player1",chessmodel);
+				player2 = new MachinePlayer(false,gameView,"Uniform Player2",chessmodel);
 			} else {
 				gameView.drawCancel();
 				wantsToStop = true;
 			}
 			if (!wantsToStop) {
 				//START GAME
-				Game thisGame = new Game(player1,player2,gameView);
+				position = new Position(newboard);
+				thisGame = new Game(player1,player2,gameView);
 				wantsToStop = !thisGame.play(position);
 				if (!wantsToStop) {
 					//LEARN MODEL

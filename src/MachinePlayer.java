@@ -37,8 +37,8 @@ public class MachinePlayer extends Player {
 	 * @param amIWhite
 	 * @param myView
 	 */
-	public MachinePlayer(boolean amIWhite, View myView, NeuronalModel chessmodel) {
-		super(amIWhite, myView);
+	public MachinePlayer(boolean amIWhite, View myView, String name, NeuronalModel chessmodel) {
+		super(amIWhite, myView, name);
 		this.chessmodel = chessmodel;
 		this.amIAMachine=true;
 	}

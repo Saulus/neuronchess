@@ -10,15 +10,19 @@
 public final class Consts {
 	public static final byte blackFigure = -1;
 	public static final byte whiteFigure = 1;
-	public static final int fullMatrixSize = 383; // starting from 0
-	public static final byte oneFigureSize = 64; // 8x8
+	public static final byte verticalBoardsize = 8;
+	public static final byte horizontalBoardsize = 8;
+	public static final byte boardsize = verticalBoardsize*horizontalBoardsize; // 8x8
 	public static final byte countFigures = 6; // B	L	S	T	D	K
+	public static final int fullMatrixSize = boardsize * countFigures;
+	
 	public static final byte bauerNumber = 1;
 	public static final byte laeuferNumber = 2; 
 	public static final byte springerNumber = 3; 
 	public static final byte turmNumber = 4; 
 	public static final byte dameNumber = 5; 
 	public static final byte koenigNumber = 6; 
+	
 	public static final int bauerStart = (bauerNumber - 1) * oneFigureSize; // 8x8 per each figure type
 	public static final int bauerEnd = (bauerNumber * oneFigureSize) - 1; // 8x8 per each figure type
 	public static final int laeuferStart = (laeuferNumber - 1) * oneFigureSize; // 8x8 per each figure type

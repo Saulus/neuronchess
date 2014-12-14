@@ -12,8 +12,8 @@ public class HumanPlayer extends Player {
 	 * @param amIWhite
 	 * @param myView
 	 */
-	public HumanPlayer(boolean amIWhite, View myView) {
-		super(amIWhite, myView);
+	public HumanPlayer(boolean amIWhite, View myView, String name) {
+		super(amIWhite, myView, name);
 		this.amIAMachine=false;
 	}
 

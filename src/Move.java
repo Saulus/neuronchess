@@ -35,7 +35,7 @@ public class Move {
 	}
 	
 	public boolean isCheckForMe(boolean amIWhite) {
-		return newPosition.isCheckForFoe(!amIWhite);
+		return newPosition.isCheckForMe(amIWhite);
 	}
 	
 	public Position getPosition() {

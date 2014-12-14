@@ -92,10 +92,18 @@ public class View {
 		 return mymoveindex;
 	}
 	
-	public void drawWinner(Player winner) {
+	public void drawEnd(float whoHasWon, String winner, boolean hasMachineWonAgainstHuman) {
 		System.out.print("And the Winner is...");
-		if (winner.areYouWhite()) System.out.println("Weiss!"); System.out.println("Schwarz!"); 
-		if (winner.areYouAMachine()) System.out.println("HAHAHAHA! LOOOOOSER!"); else System.out.println("Congrats... ;-(");
+		if (whoHasWon == 1) {
+			System.out.println("Weiss!");
+			System.out.println("Congrats, "+winner+"!");
+		}
+		else if (whoHasWon == 0) {
+			System.out.println("Schwarz!");
+			System.out.println("Congrats, "+winner+"!");
+		}
+		else System.out.println("Niemand, unentschieden.");
+		if (hasMachineWonAgainstHuman) System.out.println("HAHAHAHA! LOOOOOSER!");
 	}
 	
 	public void drawCancel() {

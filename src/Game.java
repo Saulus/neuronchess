@@ -14,7 +14,7 @@ public class Game {
 	private Player player1;
 	private Player player2;
 	private List<Position> allPositions = new ArrayList<Position>();
-	private boolean whiteHasWon;
+	private float whoHasWon; //1=White, 0=Black, 0.5=Draw
 	private boolean wasCancelled = false;
 	private View gameView;
 
@@ -31,14 +31,14 @@ public class Game {
 	public boolean play (Position position) {
 		do {
 			player1.yourNewPosition(position);
-			if (!player1.areYouCheckmate()) {
+			if (player1.canYouMove()) {
 				position = player1.makeYourMove();
 				if (position == null) wasCancelled = true;
 				else {
 					player1.showYourMove();
 					this.allPositions.add(position);
 					player2.yourNewPosition(position);
-					if (!player2.areYouCheckmate()) {
+					if (player2.canYouMove()) {
 						position = player2.makeYourMove();
 						if (position == null) wasCancelled = true;
 						else {
@@ -49,24 +49,32 @@ public class Game {
 				}
 			}
 		} while (
-				(!player1.areYouCheckmate()) &&
-				(!player2.areYouCheckmate()) &&
+				(player1.canYouMove()) &&
+				(player2.canYouMove()) &&
 				(wasCancelled == false));
 		if (!wasCancelled) {
-			if (player1.areYouCheckmate()) {
-				whiteHasWon = player2.areYouWhite();
-				gameView.drawWinner(player2);
+			//Decide Winning
+			//1. DRAW
+			if (((!player1.canYouMove()) && (!player2.canYouMove())) 
+				|| ((!player1.canYouMove()) && (!player1.areYouCheckmate()))
+				|| ((!player2.canYouMove()) && (!player2.areYouCheckmate()))) {
+				whoHasWon = (float)0.5; //DRAW
+				gameView.drawEnd(whoHasWon,"",false);	
+			}
+			else if (player1.areYouCheckmate()) {
+				whoHasWon = (player2.areYouWhite()) ? 1 : 0;
+				gameView.drawEnd(whoHasWon,player2.getName(),player2.areYouAMachine()&&!player1.areYouAMachine());
 			}
 			else if (player2.areYouCheckmate()) {
-				whiteHasWon = player1.areYouWhite();
-				gameView.drawWinner(player1);
+				whoHasWon = (player1.areYouWhite()) ? 1 : 0;
+				gameView.drawEnd(whoHasWon,player1.getName(),player1.areYouAMachine()&&!player2.areYouAMachine());
 			}
 		} else gameView.drawCancel();
 		return !wasCancelled;
 	}
 	
-	public boolean hasWhiteWon() {
-		return whiteHasWon;
+	public float whoHasWon() {
+		return whoHasWon;
 	}
 	
 	public List<Position> getAllPositions() {

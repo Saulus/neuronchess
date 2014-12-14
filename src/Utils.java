@@ -51,6 +51,22 @@ public final class Utils {
 		return returnval;
 	}
 	
+	//returns position in matrix (e.g. 1/1 for A1)
+	public int[] convertToMatrix (int pos) {
+		int relPos = pos % Consts.oneFigureSize;
+		int horizontal = relPos % 8;
+		int vertical = (relPos - horizontal)/8;
+		
+	}
+	
+	//returns position in matrix (e.g. 1/1 for A1)
+	public int convertFromMatrix (int[] matrixpos) {
+		int relPos = pos % Consts.oneFigureSize;
+		int horizontal = relPos % 8;
+		int vertical = (relPos - horizontal)/8;
+
+	}
+	
 	public final static String whichPlace(int pos) {
 		int relPos = pos % Consts.oneFigureSize;
 		int horizontal = relPos % 8;
@@ -100,5 +116,6 @@ public final class Utils {
 		figurepos = vertical*8+horizontal + (figureno -1) * Consts.oneFigureSize;
 		return figurepos;
 	}
+		
 
 }
