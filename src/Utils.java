@@ -17,12 +17,12 @@ public final class Utils {
 	/**
 	 * @param board in format: "wBA1 for "weiﬂer Bauer auf A2" and sSA7 for "schwarzer Springer auf A7"
 	 */
-	public final static byte[] buildBoardmatrix(String[] board) {
+	public final static byte[][] buildBoardmatrix(String[] board) {
 		String nextfigure;
 		int figureno=0;
-		int figurepos = 0;
+		Position figurepos;
 		boolean isWhite = false;
-		byte[] boardmatrix = new byte[Consts.fullMatrixSize+1];
+		byte[][] boardmatrix = new byte[Consts.horizontalBoardsize][Consts.verticalBoardsize];
 		for (int i=0;i<board.length;i++) {
 			nextfigure = board[i].toLowerCase();
 			switch (nextfigure.charAt(0)) {
@@ -32,8 +32,8 @@ public final class Utils {
 			}
 			figureno = whichFigureType(nextfigure.substring(1,2));
 			figurepos = whichPosition(figureno,nextfigure.substring(2, 4));
-			if (isWhite) boardmatrix[figurepos] = Consts.whiteFigure;
-				else boardmatrix[figurepos] = Consts.blackFigure;
+			if (isWhite) boardmatrix[figurepos.h][figurepos.v] = (byte) (figureno * Consts.whiteFigure);
+				else boardmatrix[figurepos.h][figurepos.v] = (byte) (figureno * Consts.blackFigure);
 		}
 		return boardmatrix;
 	}
@@ -51,27 +51,8 @@ public final class Utils {
 		return returnval;
 	}
 	
-	//returns position in matrix (e.g. 1/1 for A1)
-	public int[] convertToMatrix (int pos) {
-		int relPos = pos % Consts.oneFigureSize;
-		int horizontal = relPos % 8;
-		int vertical = (relPos - horizontal)/8;
-		
-	}
-	
-	//returns position in matrix (e.g. 1/1 for A1)
-	public int convertFromMatrix (int[] matrixpos) {
-		int relPos = pos % Consts.oneFigureSize;
-		int horizontal = relPos % 8;
-		int vertical = (relPos - horizontal)/8;
-
-	}
-	
-	public final static String whichPlace(int pos) {
-		int relPos = pos % Consts.oneFigureSize;
-		int horizontal = relPos % 8;
-		int vertical = (relPos - horizontal)/8;
-		String returnval = Consts.horizontalPositions[horizontal] + Consts.verticalPositions[vertical];
+	public final static String whichPlace(Position pos) {
+		String returnval = Consts.horizontalPositions[pos.h] + Consts.verticalPositions[pos.v];
 		return returnval;
 	}
 	
@@ -89,10 +70,10 @@ public final class Utils {
 		return figureType;
 	}
 	
-	public final static int whichPosition(int figureno, String place) {
-		int vertical = 0;
-		int horizontal = 0;
-		int figurepos = 0;
+	public final static Position whichPosition(int figureno, String place) {
+		byte vertical = 0;
+		byte horizontal = 0;
+		Position figurepos;
 		switch (place.toLowerCase().charAt(0)) {
 			case 'a': horizontal = 0;break;
 			case 'b': horizontal = 1;break;
@@ -113,7 +94,7 @@ public final class Utils {
 			case '7': vertical = 6;break;
 			case '8': vertical = 7;break;
 		}
-		figurepos = vertical*8+horizontal + (figureno -1) * Consts.oneFigureSize;
+		figurepos = new Position(horizontal,vertical);
 		return figurepos;
 	}
 		

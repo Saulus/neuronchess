@@ -19,7 +19,7 @@ public class NeuronalModel {
 		
 	}
 	
-	public float willWhiteWin(byte[] boardmatrix) {
+	public float willWhiteWin(byte[][] boardmatrix) {
 		float randomfloat = this.randomno.nextFloat();
 		return randomfloat;
 	}

@@ -21,9 +21,9 @@ public class HumanPlayer extends Player {
 	 * @see Player#makeYourMove()
 	 */
 	@Override
-	public Position makeYourMove() {
+	public Board makeYourMove() {
 		this.moveindex=gameView.getHumanInput(myMoves, amIWhite);
-		if (moveindex != -1) return myMoves.get(moveindex).getPosition();
+		if (moveindex != -1) return myMoves.get(moveindex).getBoard();
 		else return null;
 	}
 

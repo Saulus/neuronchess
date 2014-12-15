@@ -8,53 +8,52 @@
  *
  */
 public class Move {
-	private Position newPosition;
+	private Board newBoard;
 	private byte figureType;
-	private int startpos;
-	private int targetpos;
+	private Position startpos;
+	private Position targetpos;
 	private byte knockedOff = 0;
 
 	/**
 	 * @param 
 	 */
-	public Move(Position startposition, byte figureType, int startpos, int targetpos) {
-		byte[] boardmatrix = new byte[Consts.fullMatrixSize+1];
-		System.arraycopy(startposition.getBoardmatrix(), 0, boardmatrix, 0, boardmatrix.length);
-		this.newPosition = new Position(boardmatrix);
-		this.knockedOff = newPosition.whoIsOnField(targetpos);
-		newPosition.setFieldValue(startpos, (byte)0);
-		newPosition.setFieldValueAllFields(targetpos, (byte)0);
-		newPosition.setFieldValue(targetpos, startposition.getFieldValue(startpos));
+	public Move(Board startboard, byte figureType, Position startpos, Position targetpos) {
+		byte[][] boardmatrix = new byte[Consts.horizontalBoardsize][Consts.verticalBoardsize];
+		System.arraycopy(startboard.getBoardmatrix(), 0, boardmatrix, 0, boardmatrix.length);
+		this.newBoard = new Board(boardmatrix);
+		this.knockedOff = newBoard.whoIsOnField(targetpos);
+		newBoard.setWhoIsOnField(startpos, (byte)0);
+		newBoard.setWhoIsOnField(targetpos, startboard.whoIsOnField(startpos));
 		this.startpos = startpos;
 		this.figureType = figureType; 
 		this.targetpos = targetpos;
 	}
 	
 	public boolean isCheckForFoe(boolean amIWhite) {
-		return newPosition.isCheckForFoe(amIWhite);
+		return newBoard.isCheckForFoe(amIWhite);
 	}
 	
 	public boolean isCheckForMe(boolean amIWhite) {
-		return newPosition.isCheckForMe(amIWhite);
+		return newBoard.isCheckForMe(amIWhite);
 	}
 	
-	public Position getPosition() {
-		return newPosition;
+	public Board getBoard() {
+		return newBoard;
 	}
 	
-	public byte[] getBoardmatrix() {
-		return newPosition.getBoardmatrix();
+	public byte[][] getBoardmatrix() {
+		return newBoard.getBoardmatrix();
 	}
 	
 	public byte getFiguretype() {
 		return figureType;
 	}
 	
-	public int getStartpos() {
+	public Position getStartpos() {
 		return startpos;
 	}
 	
-	public int getTargetpos() {
+	public Position getTargetpos() {
 		return targetpos;
 	}
 	

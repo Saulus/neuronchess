@@ -42,7 +42,7 @@ public class View {
 		 return ret;
 	}
 	
-	public void drawBoard(Position position) {
+	public void drawBoard(Board board) {
 		
 	}
 	
@@ -76,12 +76,12 @@ public class View {
 			 if (usermove == "e") isCancel = true;
 			 else {
 				 byte figuretype = Utils.whichFigureType(usermove.substring(0,1));
-				 int oldposition = Utils.whichPosition(figuretype, usermove.substring(1,3));
-				 int newposition = Utils.whichPosition(figuretype, usermove.substring(3,5));
+				 Position oldposition = Utils.whichPosition(figuretype, usermove.substring(1,3));
+				 Position newposition = Utils.whichPosition(figuretype, usermove.substring(3,5));
 				 for (int i=0; i<possibleMoves.size(); i++) {
 						if ((possibleMoves.get(i).getFiguretype() == figuretype) &&
-							(possibleMoves.get(i).getStartpos() == oldposition) &&
-							(possibleMoves.get(i).getTargetpos() == newposition)) {
+							(possibleMoves.get(i).getStartpos().equals(oldposition)) &&
+							(possibleMoves.get(i).getTargetpos().equals(newposition))) {
 							mymoveindex=i;
 							isCorrect = true;
 							break;

@@ -23,18 +23,6 @@ public final class Consts {
 	public static final byte dameNumber = 5; 
 	public static final byte koenigNumber = 6; 
 	
-	public static final int bauerStart = (bauerNumber - 1) * oneFigureSize; // 8x8 per each figure type
-	public static final int bauerEnd = (bauerNumber * oneFigureSize) - 1; // 8x8 per each figure type
-	public static final int laeuferStart = (laeuferNumber - 1) * oneFigureSize; // 8x8 per each figure type
-	public static final int laeuferEnd = (laeuferNumber * oneFigureSize) - 1; // 8x8 per each figure type
-	public static final int springerStart = (springerNumber - 1) * oneFigureSize; // 8x8 per each figure type
-	public static final int springerEnd = (springerNumber * oneFigureSize) - 1; // 8x8 per each figure type
-	public static final int turmStart = (turmNumber - 1) * oneFigureSize; // 8x8 per each figure type
-	public static final int turmEnd = (turmNumber * oneFigureSize) - 1; // 8x8 per each figure type
-	public static final int dameStart = (dameNumber - 1) * oneFigureSize; // 8x8 per each figure type
-	public static final int dameEnd = (dameNumber * oneFigureSize) - 1; // 8x8 per each figure type
-	public static final int koenigStart = (koenigNumber - 1) * oneFigureSize; // 8x8 per each figure type
-	public static final int koenigEnd = (koenigNumber * oneFigureSize) - 1; // 8x8 per each figure type
 	public static final String[] startBoard = {"wta1", "wth1", "wsb1","wsg1","wlc1","wlf1","wdd1","wke1",
 					"sta8", "sth8", "ssb8","ssg8","slc8","slf8","sdd8","ske8",
 					"wba2","wbb2","wbc2","wbd2","wbe2","wbf2","wbg2","wbh2",

@@ -10,49 +10,50 @@ public class Bauer extends Figure {
 
 	/**
 	 * @param myPosition
-	 * @param position
+	 * @param board
 	 * @param myStart
 	 * @param myEnd
 	 */
-	public Bauer(Position position, int myPosition, boolean amIWhite) {
-		super(position, myPosition, amIWhite, Consts.bauerNumber, Consts.bauerStart, Consts.bauerEnd);
+	public Bauer(Board board, Position pos, boolean amIWhite) {
+		super(board, pos, amIWhite, Consts.bauerNumber);
 	}
 	
 	@Override
 	protected void calcSteps() {
 		super.calcSteps();
-		int newstep;
+		Position newstep;
 		//add one step ahead
-		newstep = myPosition + 8; //1 step ahead
-		if ((checkStepPosition(newstep)) && (!position.isFieldBlockedByFoe(amIWhite, newstep))) {	
+		newstep = new Position(myPosition.h, (byte)(myPosition.v +1));  //1 step ahead
+		if ((checkStepPosition(newstep)) && (!board.isFieldBlockedByFoe(amIWhite, newstep))) {	
 			steps.add(newstep);
 		}
 		//add possible knocks left and right
-		newstep = myPosition + 7; 
+		newstep = new Position((byte) (myPosition.h + 1), (byte) (myPosition.v + 1)); 
 		if (checkStepPosition(newstep) 
-				&& position.isFieldBlockedByFoe(amIWhite, newstep)
-				&& !position.isFieldBlockedByKingFoe(amIWhite, newstep)) {
+				&& board.isFieldBlockedByFoe(amIWhite, newstep)
+				&& !board.isFieldBlockedByFoeKing(amIWhite, newstep)) {
 			steps.add(newstep);
 		}
-		newstep = myPosition + 9; 
+		newstep = new Position((byte) (myPosition.h - 1), (byte) (myPosition.v + 1)); 
 		if (checkStepPosition(newstep) 
-				&& position.isFieldBlockedByFoe(amIWhite, newstep)
-				&& !position.isFieldBlockedByKingFoe(amIWhite, newstep)) {
+				&& board.isFieldBlockedByFoe(amIWhite, newstep)
+				&& !board.isFieldBlockedByFoeKing(amIWhite, newstep)) {
 			steps.add(newstep);
-		}	
+		}
+		//ToDo: Add "Schlagen en pasant"
 	}
 	
 	@Override
 	protected void calcCheck() {
 		super.calcCheck();
-		int newstep;
+		Position newstep;
 		//add possible knocks left and right
-		newstep = myPosition + 7; 
+		newstep = new Position((byte) (myPosition.h + 1), (byte) (myPosition.v + 1)); 
 		if (checkStepPosition(newstep) 
-				&& position.isFieldBlockedByKingFoe(amIWhite, newstep)) this.makesCheck=true;
-		newstep = myPosition + 9; 
+				&& board.isFieldBlockedByFoeKing(amIWhite, newstep)) this.makesCheck=true;
+		newstep = new Position((byte) (myPosition.h - 1), (byte) (myPosition.v + 1)); 
 		if (checkStepPosition(newstep) 
-				&& position.isFieldBlockedByKingFoe(amIWhite, newstep)) this.makesCheck=true;
+				&& board.isFieldBlockedByFoeKing(amIWhite, newstep)) this.makesCheck=true;
 	}
 	
 }

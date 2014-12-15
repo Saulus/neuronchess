@@ -13,7 +13,7 @@ import java.util.List;
 public class Game {
 	private Player player1;
 	private Player player2;
-	private List<Position> allPositions = new ArrayList<Position>();
+	private List<Board> allPositions = new ArrayList<Board>();
 	private float whoHasWon; //1=White, 0=Black, 0.5=Draw
 	private boolean wasCancelled = false;
 	private View gameView;
@@ -28,22 +28,22 @@ public class Game {
 	}
 	
 	//returns false if cancelled
-	public boolean play (Position position) {
+	public boolean play (Board board) {
 		do {
-			player1.yourNewPosition(position);
+			player1.yourNewPosition(board);
 			if (player1.canYouMove()) {
-				position = player1.makeYourMove();
-				if (position == null) wasCancelled = true;
+				board = player1.makeYourMove();
+				if (board == null) wasCancelled = true;
 				else {
 					player1.showYourMove();
-					this.allPositions.add(position);
-					player2.yourNewPosition(position);
+					this.allPositions.add(board);
+					player2.yourNewPosition(board);
 					if (player2.canYouMove()) {
-						position = player2.makeYourMove();
-						if (position == null) wasCancelled = true;
+						board = player2.makeYourMove();
+						if (board == null) wasCancelled = true;
 						else {
 							player2.showYourMove();
-							this.allPositions.add(position);
+							this.allPositions.add(board);
 						}
 					}
 				}
@@ -77,7 +77,7 @@ public class Game {
 		return whoHasWon;
 	}
 	
-	public List<Position> getAllPositions() {
+	public List<Board> getAllPositions() {
 		return allPositions;
 	}
 

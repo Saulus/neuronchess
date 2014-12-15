@@ -47,7 +47,7 @@ public class MachinePlayer extends Player {
 	 * @see Player#makeYourMove()
 	 */
 	@Override
-	public Position makeYourMove() {
+	public Board makeYourMove() {
 		//random number for selection of Top3
 		float randomfloat = this.randomno.nextFloat();
 		Pair[] probs;
@@ -63,7 +63,7 @@ public class MachinePlayer extends Player {
 			if (randomfloat < Consts.firstChoise) moveindex = probs[0].index;
 			else if ((randomfloat >= Consts.firstChoise) && (randomfloat < Consts.firstChoise + Consts.secondChoise)) moveindex = probs[1].index;
 			else moveindex = probs[2].index;
-			return myMoves.get(moveindex).getPosition();
+			return myMoves.get(moveindex).getBoard();
 		} else return null;
 	}
 

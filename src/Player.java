@@ -26,10 +26,10 @@ public abstract class Player {
 		this.name=name;
 	}
 	
-	public void yourNewPosition (Position position) {
-		this.myMoves = position.getAllMoves(this.amIWhite);
+	public void yourNewPosition (Board board) {
+		this.myMoves = board.getAllMoves(this.amIWhite);
 		this.cannotmove = (myMoves.size() == 0);
-		this.checkmate = (cannotmove) && (position.isCheckForMe(amIWhite));
+		this.checkmate = (cannotmove) && (board.isCheckForMe(amIWhite));
 		this.moveindex = 0;
 	}
 	
@@ -42,7 +42,7 @@ public abstract class Player {
 	}
 	
 	//to be overwritten by Child-Class
-	public abstract Position makeYourMove();
+	public abstract Board makeYourMove();
 	
 	public void showYourMove() {
 		this.gameView.drawMove( myMoves.get(moveindex), amIWhite);

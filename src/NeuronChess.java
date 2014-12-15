@@ -21,10 +21,10 @@ public class NeuronChess {
 		//ToDO
 		NeuronalModel chessmodel = new NeuronalModel();
 		//2. Build new starting position
-		byte[] newboard = Utils.buildBoardmatrix(Consts.startBoard);
+		byte[][] newboard = Utils.buildBoardmatrix(Consts.startBoard);
 		//3. Create Players, Position and View
 		View gameView = new View();
-		Position position;
+		Board board;
 		Player player1 = null;
 		Player player2 = null;
 		Game thisGame;
@@ -47,9 +47,9 @@ public class NeuronChess {
 			}
 			if (!wantsToStop) {
 				//START GAME
-				position = new Position(newboard);
+				board = new Board(newboard);
 				thisGame = new Game(player1,player2,gameView);
-				wantsToStop = !thisGame.play(position);
+				wantsToStop = !thisGame.play(board);
 				if (!wantsToStop) {
 					//LEARN MODEL
 				}
