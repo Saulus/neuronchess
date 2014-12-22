@@ -60,9 +60,9 @@ public class MachinePlayer extends Player {
 			//sort
 			Arrays.sort(probs);
 			//get Top acc. to random number
-			if (randomfloat < Consts.firstChoise) moveindex = probs[0].index;
-			else if ((randomfloat >= Consts.firstChoise) && (randomfloat < Consts.firstChoise + Consts.secondChoise)) moveindex = probs[1].index;
-			else moveindex = probs[2].index;
+			moveindex = probs[0].index;
+			if ((probs.length>1) && (randomfloat >= Consts.firstChoise) && (randomfloat < Consts.firstChoise + Consts.secondChoise)) moveindex = probs[1].index;
+			else if (probs.length>2) moveindex = probs[2].index;
 			return myMoves.get(moveindex).getBoard();
 		} else return null;
 	}

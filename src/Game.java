@@ -47,6 +47,9 @@ public class Game {
 						}
 					}
 				}
+				//ToDO:
+				// Ende wegen 2*Koenig (+Läufer oder Springer)
+				// Ende wegen 3mal gleicher Zug- 
 			}
 		} while (
 				(player1.canYouMove()) &&

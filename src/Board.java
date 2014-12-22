@@ -12,8 +12,7 @@ public class Board {
 	public boolean isCheckForFoe(boolean amIWhite) {
 		boolean isit = false; 
 		//Loop over Black or White?
-		byte myFigures;
-		if (amIWhite) myFigures = Consts.whiteFigure; else myFigures = Consts.blackFigure;
+		byte myFigures = (amIWhite)? Consts.whiteFigure : Consts.blackFigure;
 		//loop over board to find all my figures
 		Figure myFigure = null;
 		int myFigureNo;
@@ -26,10 +25,10 @@ public class Board {
 					switch (myFigureNo) {
 						case Consts.bauerNumber: myFigure = new Bauer(this,myPosition,amIWhite);break;
 						case Consts.laeuferNumber: myFigure = new Laeufer(this,myPosition,amIWhite);break;
-						/*case Consts.springerNumber: myFigure = new Springer(this,myPosition,amIWhite);break;
+						case Consts.springerNumber: myFigure = new Springer(this,myPosition,amIWhite);break;
 						case Consts.turmNumber: myFigure = new Turm(this,myPosition,amIWhite);break;
 						case Consts.dameNumber: myFigure = new Dame(this,myPosition,amIWhite);break;
-						case Consts.koenigNumber: myFigure = new Koenig(this,myPosition,amIWhite);break;*/
+						case Consts.koenigNumber: myFigure = new Koenig(this,myPosition,amIWhite);break;
 						default: myFigure = new Bauer(this,myPosition,amIWhite);break;
 					}
 					if (myFigure.makesCheck()) { isit = true; break; }
@@ -47,8 +46,7 @@ public class Board {
 		List<Move> moves = new ArrayList<Move>();
 		Move newmove;
 		//Loop over Black or White?
-		byte myFigures;
-		if (amIWhite) myFigures = Consts.whiteFigure; else myFigures = Consts.blackFigure;
+		byte myFigures = (amIWhite)? Consts.whiteFigure : Consts.blackFigure;
 		//loop over board to find all my figures
 		Figure myFigure = null;
 		int myFigureNo;
@@ -61,10 +59,10 @@ public class Board {
 					switch (myFigureNo) {
 						case Consts.bauerNumber: myFigure = new Bauer(this,myPosition,amIWhite);break;
 						case Consts.laeuferNumber: myFigure = new Laeufer(this,myPosition,amIWhite);break;
-						/*case Consts.springerNumber: myFigure = new Springer(this,myPosition,amIWhite);break;
-									case Consts.turmNumber: myFigure = new Turm(this,myPosition,amIWhite);break;
-									case Consts.dameNumber: myFigure = new Dame(this,myPosition,amIWhite);break;
-									case Consts.koenigNumber: myFigure = new Koenig(this,myPosition,amIWhite);break;*/
+						case Consts.springerNumber: myFigure = new Springer(this,myPosition,amIWhite);break;
+						case Consts.turmNumber: myFigure = new Turm(this,myPosition,amIWhite);break;
+						case Consts.dameNumber: myFigure = new Dame(this,myPosition,amIWhite);break;
+						case Consts.koenigNumber: myFigure = new Koenig(this,myPosition,amIWhite);break;
 						default: myFigure = new Bauer(this,myPosition,amIWhite);break;
 					}
 					while (myFigure.hasNextStep()) {
@@ -139,11 +137,11 @@ public class Board {
 	}
 	
 	public boolean isFieldBlockedByOwnKing(boolean isWhite, Position pos) {
-		return (whoIsOnField(pos) == Consts.koenigNumber) && isFieldBlockedByOwn(isWhite, pos);
+		return (Math.abs(whoIsOnField(pos)) == Consts.koenigNumber) && isFieldBlockedByOwn(isWhite, pos);
 	}
 	
 	public boolean isFieldBlockedByFoeKing(boolean isWhite, Position pos) {
-		return (whoIsOnField(pos) == Consts.koenigNumber) && isFieldBlockedByOwn(!isWhite, pos);
+		return (Math.abs(whoIsOnField(pos)) == Consts.koenigNumber) && isFieldBlockedByOwn(!isWhite, pos);
 	}
 	
 }

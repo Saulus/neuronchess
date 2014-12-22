@@ -40,7 +40,7 @@ public final class Utils {
 	
 	public final static String whichFigure(byte figNo) {
 		String returnval = "";
-		switch (figNo) {
+		switch (Math.abs(figNo)) {
 			case Consts.bauerNumber: returnval = "B";break;
 			case Consts.laeuferNumber: returnval = "L";break;
 			case Consts.springerNumber: returnval = "S";break;

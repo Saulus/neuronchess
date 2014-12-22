@@ -24,10 +24,10 @@ public class Laeufer extends Figure {
 	@Override
 	protected void calcSteps() {
 		super.calcSteps();
-		Position newstep;
+		Position newstep = myPosition;
 		//add steps ahead left
 		do {
-			newstep = new Position((byte) (myPosition.h + 1), (byte) (myPosition.v + 1));  //1 step ahead
+			newstep = new Position((byte) (newstep.h + 1), (byte) (newstep.v + 1));  //1 step ahead
 			if (checkStepPosition(newstep) 
 					&& !board.isFieldBlockedByFoeKing(amIWhite, newstep))
 				steps.add(newstep);
@@ -35,7 +35,7 @@ public class Laeufer extends Figure {
 		//add steps ahead right
 		newstep = myPosition;
 		do {
-			newstep = new Position((byte) (myPosition.h - 1), (byte) (myPosition.v + 1));  //1 step ahead
+			newstep = new Position((byte) (newstep.h - 1), (byte) (newstep.v + 1));  //1 step ahead
 			if (checkStepPosition(newstep) 
 					&& !board.isFieldBlockedByFoeKing(amIWhite, newstep))
 				steps.add(newstep);
@@ -43,7 +43,7 @@ public class Laeufer extends Figure {
 		//add steps back left
 		newstep = myPosition;
 		do {
-			newstep = new Position((byte) (myPosition.h + 1), (byte) (myPosition.v - 1));  //1 step back
+			newstep = new Position((byte) (newstep.h + 1), (byte) (newstep.v - 1));  //1 step back
 			if (checkStepPosition(newstep) 
 					&& !board.isFieldBlockedByFoeKing(amIWhite, newstep))
 				steps.add(newstep);
@@ -51,7 +51,7 @@ public class Laeufer extends Figure {
 		//add steps back right
 		newstep = myPosition;
 		do {
-			newstep = new Position((byte) (myPosition.h - 1), (byte) (myPosition.v - 1));  //1 step back
+			newstep = new Position((byte) (newstep.h - 1), (byte) (newstep.v - 1));  //1 step back
 			if (checkStepPosition(newstep) 
 					&& !board.isFieldBlockedByFoeKing(amIWhite, newstep))
 				steps.add(newstep);
@@ -61,10 +61,10 @@ public class Laeufer extends Figure {
 	@Override
 	protected void calcCheck() {
 		super.calcCheck();
-		Position newstep;
+		Position newstep = myPosition;
 		//add steps ahead left
 		do {
-			newstep = new Position((byte) (myPosition.h + 1), (byte) (myPosition.v + 1));  //1 step ahead
+			newstep = new Position((byte) (newstep.h + 1), (byte) (newstep.v + 1));  //1 step ahead
 			if (checkStepPosition(newstep) 
 					&& board.isFieldBlockedByFoeKing(amIWhite, newstep)) this.makesCheck=true;
 		} while (checkStepPosition(newstep) && !board.isFieldBlockedByFoe(amIWhite, newstep)); //as long as is not blocked
@@ -72,30 +72,30 @@ public class Laeufer extends Figure {
 		if (!this.makesCheck) {
 			newstep = myPosition;
 			do {
-				newstep = new Position((byte) (myPosition.h - 1), (byte) (myPosition.v + 1));  //1 step ahead
+				newstep = new Position((byte) (newstep.h - 1), (byte) (newstep.v + 1));  //1 step ahead
 				if (checkStepPosition(newstep) 
-						&& !board.isFieldBlockedByFoeKing(amIWhite, newstep))
-					steps.add(newstep);
+						&& board.isFieldBlockedByFoeKing(amIWhite, newstep))
+					this.makesCheck=true;
 			} while (checkStepPosition(newstep) && !board.isFieldBlockedByFoe(amIWhite, newstep)); //as long as is not blocked
 		}
 		//add steps back left
 		if (!this.makesCheck) {
 			newstep = myPosition;
 			do {
-				newstep = new Position((byte) (myPosition.h + 1), (byte) (myPosition.v - 1));  //1 step ahead //1 step back
+				newstep = new Position((byte) (newstep.h + 1), (byte) (newstep.v - 1));  //1 step ahead //1 step back
 				if (checkStepPosition(newstep) 
-						&& !board.isFieldBlockedByFoeKing(amIWhite, newstep))
-					steps.add(newstep);
+						&& board.isFieldBlockedByFoeKing(amIWhite, newstep))
+					this.makesCheck=true;
 			} while (checkStepPosition(newstep) && !board.isFieldBlockedByFoe(amIWhite, newstep)); //as long as is not blocked
 		}
 		//add steps back right
 		if (!this.makesCheck) {
 			newstep = myPosition;
 			do {
-				newstep = new Position((byte) (myPosition.h - 1), (byte) (myPosition.v - 1));  //1 step ahead //1 step back
+				newstep = new Position((byte) (newstep.h - 1), (byte) (newstep.v - 1));  //1 step ahead //1 step back
 				if (checkStepPosition(newstep) 
-						&& !board.isFieldBlockedByFoeKing(amIWhite, newstep))
-					steps.add(newstep);
+						&& board.isFieldBlockedByFoeKing(amIWhite, newstep))
+					this.makesCheck=true;
 			} while (checkStepPosition(newstep) && !board.isFieldBlockedByFoe(amIWhite, newstep)); //as long as is not blocked
 		}
 	}

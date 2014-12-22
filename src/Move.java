@@ -1,3 +1,5 @@
+import java.util.Arrays;
+
 
 /**
  * 
@@ -19,7 +21,10 @@ public class Move {
 	 */
 	public Move(Board startboard, byte figureType, Position startpos, Position targetpos) {
 		byte[][] boardmatrix = new byte[Consts.horizontalBoardsize][Consts.verticalBoardsize];
-		System.arraycopy(startboard.getBoardmatrix(), 0, boardmatrix, 0, boardmatrix.length);
+		//copy array
+		for (int i = 0; i < Consts.horizontalBoardsize; i++) {
+			boardmatrix[i] = Arrays.copyOf(startboard.getBoardmatrix()[i], startboard.getBoardmatrix()[i].length);
+		}
 		this.newBoard = new Board(boardmatrix);
 		this.knockedOff = newBoard.whoIsOnField(targetpos);
 		newBoard.setWhoIsOnField(startpos, (byte)0);

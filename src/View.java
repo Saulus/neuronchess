@@ -51,7 +51,7 @@ public class View {
 		else System.out.print("Schwarz: ");
 		System.out.print(Utils.whichFigure(move.getFiguretype()) + Utils.whichPlace(move.getStartpos()) +  " " +  Utils.whichPlace(move.getTargetpos()) +  " ");
 		//Knocked somebody off?
-		if (move.knockedOff() > 0) System.out.print("#"+Utils.whichFigure(move.knockedOff()) +  " ");
+		if (move.knockedOff() != 0) System.out.print("#"+Utils.whichFigure(move.knockedOff()) +  " ");
 		//Checkmate or check?
 		if (move.isCheckForFoe(amIWhite)) System.out.println("+");
 		else System.out.println();
@@ -59,12 +59,12 @@ public class View {
 	
 	//usermove must be something like "Sa1 b1" or "Sa1b1"
 	public int getHumanInput (List<Move> possibleMoves, boolean forWhite) {
-		 System.out.print("Dein Zug (e für Ende): ");
 		 String usermove= null;
 		 int mymoveindex = -1;
 		 boolean isCorrect = false;
 		 boolean isCancel = false;
 		 do {
+			 System.out.print("Dein Zug (e für Ende): ");
 			 try {
 				  	usermove = br.readLine();
 			 } catch (IOException ioe) {
@@ -73,7 +73,7 @@ public class View {
 		     }
 			 usermove = usermove.replaceAll("\\s","");
 			 usermove = usermove.toLowerCase();
-			 if (usermove == "e") isCancel = true;
+			 if (usermove.equals("e")) isCancel = true;
 			 else {
 				 byte figuretype = Utils.whichFigureType(usermove.substring(0,1));
 				 Position oldposition = Utils.whichPosition(figuretype, usermove.substring(1,3));
