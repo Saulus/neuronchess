@@ -144,4 +144,41 @@ public class Board {
 		return (Math.abs(whoIsOnField(pos)) == Consts.koenigNumber) && isFieldBlockedByOwn(!isWhite, pos);
 	}
 	
+	public byte howManyFiguresAreLeft () {
+		byte count = 0;
+		for (byte h=0; h<Consts.horizontalBoardsize; h++) {
+			for (byte v=0; v<Consts.verticalBoardsize; v++) {
+				if (boardmatrix[h][v]!=0) count++;
+			}
+		}
+		return count;
+	}
+	
+	public byte whoElseIsOnBesidesKings () {
+		for (byte h=0; h<Consts.horizontalBoardsize; h++) {
+			for (byte v=0; v<Consts.verticalBoardsize; v++) {
+				if (boardmatrix[h][v]!=0 && Math.abs(boardmatrix[h][v])!=Consts.koenigNumber) return boardmatrix[h][v];
+			}
+		}
+		return 0;
+	}
+	
+	public boolean equals(Object other) {
+		if (this == other)
+			return true;
+		if (other == null)
+			return false;
+		if (other.getClass() != getClass())
+			return false;
+		
+		Position pos;
+		for (byte h=0; h<Consts.horizontalBoardsize; h++) {
+			for (byte v=0; v<Consts.verticalBoardsize; v++) {
+				pos = new Position(h,v);
+				if (this.whoIsOnField(pos) != ((Board)other).whoIsOnField(pos)) return false;
+			}
+		}
+		return true;
+	} 
+	
 }

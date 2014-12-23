@@ -29,38 +29,27 @@ public class Game {
 	
 	//returns false if cancelled
 	public boolean play (Board board) {
+		Player isOn = null;
 		do {
-			player1.yourNewPosition(board);
-			if (player1.canYouMove()) {
-				board = player1.makeYourMove();
+			if (isOn == player1) isOn=player2; else isOn=player1;
+			isOn.yourNewPosition(board);
+			if (isOn.canYouMove()) {
+				board = isOn.makeYourMove();
 				if (board == null) wasCancelled = true;
 				else {
-					player1.showYourMove();
+					isOn.showYourMove();
 					this.allPositions.add(board);
-					player2.yourNewPosition(board);
-					if (player2.canYouMove()) {
-						board = player2.makeYourMove();
-						if (board == null) wasCancelled = true;
-						else {
-							player2.showYourMove();
-							this.allPositions.add(board);
-						}
-					}
 				}
-				//ToDO:
-				// Ende wegen 2*Koenig (+Läufer oder Springer)
-				// Ende wegen 3mal gleicher Zug- 
 			}
 		} while (
-				(player1.canYouMove()) &&
-				(player2.canYouMove()) &&
+				!isDraw(board) &&
+				!player1.areYouCheckmate() &&
+				!player2.areYouCheckmate() &&
 				(wasCancelled == false));
 		if (!wasCancelled) {
 			//Decide Winning
 			//1. DRAW
-			if (((!player1.canYouMove()) && (!player2.canYouMove())) 
-				|| ((!player1.canYouMove()) && (!player1.areYouCheckmate()))
-				|| ((!player2.canYouMove()) && (!player2.areYouCheckmate()))) {
+			if (isDraw(board)) {
 				whoHasWon = (float)0.5; //DRAW
 				gameView.drawEnd(whoHasWon,"",false);	
 			}
@@ -76,6 +65,22 @@ public class Game {
 		return !wasCancelled;
 	}
 	
+	private boolean isDraw(Board board) {
+		if ((!player1.canYouMove()) && (!player2.canYouMove())) return true;
+		if ((!player1.canYouMove()) && (!player1.areYouCheckmate())) return true;
+		if ((!player2.canYouMove()) && (!player2.areYouCheckmate())) return true;
+		//3mal gleicher Zug
+		if (allPositions.size()>=5 &&
+			allPositions.get(allPositions.size()-1).equals(allPositions.get(allPositions.size()-2)) &&
+			allPositions.get(allPositions.size()-2).equals(allPositions.get(allPositions.size()-3))) return true;
+		//Nur noch Könige und Läufer oder Springer
+		if (board.howManyFiguresAreLeft()==2 ||
+				(board.howManyFiguresAreLeft()==3 && (
+				Math.abs(board.whoElseIsOnBesidesKings())==Consts.springerNumber ||
+				Math.abs(board.whoElseIsOnBesidesKings())==Consts.laeuferNumber))) return true;
+		return false;
+	}
+
 	public float whoHasWon() {
 		return whoHasWon;
 	}
