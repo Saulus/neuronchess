@@ -23,7 +23,8 @@ public abstract class Figure {
 	 * 
 	 */
 	public Figure(Board board, Position pos, boolean amIWhite, byte whoAmI) {
-		this.whoAmI = whoAmI;
+		byte myV = (amIWhite)? Consts.whiteFigure : Consts.blackFigure;
+		this.whoAmI = (byte)(whoAmI* myV);
 		this.amIWhite = amIWhite;
 		this.myPosition = pos;
 		this.board = board;

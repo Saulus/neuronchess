@@ -1,4 +1,3 @@
-import java.util.Arrays;
 
 
 /**
@@ -19,19 +18,51 @@ public class Move {
 	/**
 	 * @param 
 	 */
-	public Move(Board startboard, byte figureType, Position startpos, Position targetpos) {
-		byte[][] boardmatrix = new byte[Consts.horizontalBoardsize][Consts.verticalBoardsize];
-		//copy array
-		for (int i = 0; i < Consts.horizontalBoardsize; i++) {
-			boardmatrix[i] = Arrays.copyOf(startboard.getBoardmatrix()[i], startboard.getBoardmatrix()[i].length);
-		}
-		this.newBoard = new Board(boardmatrix);
+	public Move(Board startboard, Figure myFigure) {
+		this.newBoard = new Board(startboard);
+		this.startpos = myFigure.whereAmI();
+		this.figureType = myFigure.whoAmI();
+		this.targetpos = myFigure.getNextStep();
 		this.knockedOff = newBoard.whoIsOnField(targetpos);
 		newBoard.setWhoIsOnField(startpos, (byte)0);
-		newBoard.setWhoIsOnField(targetpos, startboard.whoIsOnField(startpos));
-		this.startpos = startpos;
-		this.figureType = figureType; 
-		this.targetpos = targetpos;
+		//Magic: from Bauer to Dame
+		if (Math.abs(figureType) == Consts.bauerNumber && (targetpos.v % (Consts.verticalBoardsize-1)  ==  0)) {
+			byte myV = (myFigure.amIWhite())? Consts.whiteFigure : Consts.blackFigure;
+			newBoard.setWhoIsOnField(targetpos, (byte) (Consts.dameNumber * myV));
+		}
+		else newBoard.setWhoIsOnField(targetpos, figureType);
+		//Deal with Rochade
+		if (Math.abs(figureType) == Consts.koenigNumber) {
+			newBoard.setKingHasMoved(figureType>0);
+			//if Rochade: move Turm too
+			if (startpos.h - targetpos.h == 2) { //Long
+				Position startturm = new Position((byte)0,startpos.v);
+				Position targetturm = new Position((byte)3,startpos.v);
+				newBoard.setWhoIsOnField(startturm, (byte)0);
+				newBoard.setWhoIsOnField(targetturm, startboard.whoIsOnField(startpos));
+			} else if (startpos.h - targetpos.h == -2) { //Short
+				Position startturm = new Position((byte)7,startpos.v);
+				Position targetturm = new Position((byte)5,startpos.v);
+				newBoard.setWhoIsOnField(startturm, (byte)0);
+				newBoard.setWhoIsOnField(targetturm, startboard.whoIsOnField(startpos));
+			}
+		} else if (Math.abs(figureType) == Consts.turmNumber) {
+			newBoard.setTurmHasMoved(figureType>0,startpos.h);
+		} 
+		// Deal with en passant
+		//1. Set it if Bauer moves 2
+		if (Math.abs(figureType) == Consts.bauerNumber && Math.abs(targetpos.v - startpos.v)==2 ) {
+			newBoard.setEnPassantPos(targetpos);
+		}
+		//2. remove other Bauer if en Passant
+		if (Math.abs(figureType) == Consts.bauerNumber 
+			&& startboard.allowsEnPassant()
+			&& startboard.getEnPassantPos().h == targetpos.h 
+			&& startboard.getEnPassantPos().v == startpos.v)
+		{
+			this.knockedOff = newBoard.whoIsOnField(startboard.getEnPassantPos());
+			newBoard.setWhoIsOnField(startboard.getEnPassantPos(), (byte)0);
+		}
 	}
 	
 	public boolean isCheckForFoe(boolean amIWhite) {

@@ -48,8 +48,13 @@ public class Bauer extends Figure {
 				&& !board.isFieldBlockedByFoeKing(amIWhite, newstep)) {
 			steps.add(newstep);
 		}
-		//ToDo: Add "Schlagen en pasant"
-		//ToDo: Magic -> werde zur Dame!
+		//"Schlagen en pasant"
+		if (board.allowsEnPassant() 
+			&& Math.abs(myPosition.h - board.getEnPassantPos().h) == 1
+			&& myPosition.v == board.getEnPassantPos().v) {
+			newstep = new Position(board.getEnPassantPos().h, (byte) (myPosition.v + myV)); 
+			if (checkStepPosition(newstep)) steps.add(newstep);
+		}
 	}
 	
 	@Override

@@ -1,12 +1,80 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
+class RochadeMoves {
+	private boolean wKing = false;
+	private boolean bKing = false;
+	private boolean wTurmA = false;
+	private boolean bTurmA = false;
+	private boolean wTurmH = false;
+	private boolean bTurmH = false;
+	
+	public RochadeMoves () {
+		
+	}
+	
+	//Copy constructor
+	public RochadeMoves (RochadeMoves other) {
+		this.wKing=other.wKing;
+		this.bKing=other.bKing;
+		this.wTurmA=other.wTurmA;
+		this.bTurmA=other.bTurmA;
+		this.wTurmH=other.wTurmH;
+		this.bTurmH=other.bTurmH;
+	}
+	
+	//WKing, WTurmA, WTurmH, SKing, STurmA, STurmH
+	public void setKing(boolean isWhite) {
+		if (isWhite) wKing=true;
+		else bKing=true;
+	}
+	
+	public void setTurm(boolean isWhite, byte hPosition) {
+		if (isWhite) {
+			if (hPosition == 0) wTurmA=true; else if (hPosition == 7) wTurmH=true;
+		}
+		else {
+			if (hPosition == 0) bTurmA=true; else if (hPosition == 7) bTurmH=true;
+		}
+	}
+	
+	public boolean isRochadeAllowed(boolean forWhite) {
+		if (forWhite) return !wKing && (!wTurmA || !wTurmH);
+		else return !bKing && (!bTurmA || !bTurmH);
+	}
+	
+	public boolean isRochadeLongAllowed(boolean forWhite) {
+		if (forWhite) return !wKing && !wTurmA;
+		else return !bKing && !bTurmA;
+	}
+	
+	public boolean isRochadeShortAllowed(boolean forWhite) {
+		if (forWhite) return !wKing && !wTurmH;
+		else return !bKing && !bTurmH;
+	}
+}
+
 public class Board {
-	private byte[][] boardmatrix; //vertical (1-8) x horizontal(A-H)
+	private byte[][] boardmatrix; //horizontal(A-H) x vertical (1-8)
+	private RochadeMoves roch;
+	private Position enPassantPos = null; //saves horizontal position
 
 	public Board(byte[][] boardmatrix) {
 		this.boardmatrix = boardmatrix;
+		this.roch = new RochadeMoves();
+	}
+	
+	//Copy Constructror
+	public Board(Board otherboard) {
+		byte[][] newmatrix = new byte[Consts.horizontalBoardsize][Consts.verticalBoardsize];
+		//copy array
+		for (int i = 0; i < Consts.horizontalBoardsize; i++) {
+			newmatrix[i] = Arrays.copyOf(otherboard.getBoardmatrix()[i], otherboard.getBoardmatrix()[i].length);
+		}
+		this.boardmatrix = newmatrix;
+		this.roch = new RochadeMoves(otherboard.roch);
 	}
 	
 	public boolean isCheckForFoe(boolean amIWhite) {
@@ -66,7 +134,7 @@ public class Board {
 						default: myFigure = new Bauer(this,myPosition,amIWhite);break;
 					}
 					while (myFigure.hasNextStep()) {
-						newmove = new Move(this,myFigure.whoAmI(),myFigure.whereAmI(),myFigure.getNextStep());
+						newmove = new Move(this,myFigure);
 						if (!newmove.isCheckForMe(amIWhite)) moves.add(newmove);
 					}
 				}
@@ -180,5 +248,37 @@ public class Board {
 		}
 		return true;
 	} 
+	
+	public boolean isRochadeAllowed(boolean forWhite) {
+		return roch.isRochadeAllowed(forWhite);
+	}
+	
+	public boolean isRochadeLongAllowed(boolean forWhite) {
+		return roch.isRochadeLongAllowed(forWhite);
+	}
+	
+	public boolean isRochadeShortAllowed(boolean forWhite) {
+		return roch.isRochadeShortAllowed(forWhite);
+	}
+
+	public void setKingHasMoved(boolean isWhite) {
+		roch.setKing(isWhite);
+	}
+	
+	public void setTurmHasMoved(boolean isWhite, byte hPosition) {
+		roch.setTurm(isWhite, hPosition);
+	}
+
+	public boolean allowsEnPassant() {
+		return enPassantPos!=null;
+	}
+	
+	public Position getEnPassantPos() {
+		return enPassantPos;
+	}
+
+	public void setEnPassantPos(Position position) {
+		this.enPassantPos = position;
+	}
 	
 }

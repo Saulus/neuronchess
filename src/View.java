@@ -52,6 +52,9 @@ public class View {
 		System.out.print(Utils.whichFigure(move.getFiguretype()) + Utils.whichPlace(move.getStartpos()) +  " " +  Utils.whichPlace(move.getTargetpos()) +  " ");
 		//Knocked somebody off?
 		if (move.knockedOff() != 0) System.out.print("#"+Utils.whichFigure(move.knockedOff()) +  " ");
+		//Magic Bauer to Dame?
+		if (move.getFiguretype() != move.getBoard().whoIsOnField(move.getTargetpos()))
+			System.out.print("->"+Utils.whichFigure(move.getBoard().whoIsOnField(move.getTargetpos())) +  " ");
 		//Checkmate or check?
 		if (move.isCheckForFoe(amIWhite)) System.out.println("+");
 		else System.out.println();

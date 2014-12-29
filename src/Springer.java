@@ -29,11 +29,11 @@ public class Springer extends Figure {
 		Position newstep;
 		for (int i=-1;i<=1;i+=2) {
 			for (int j=-1;j<=1;j+=2) {
-				newstep = new Position((byte)(myPosition.h+i+1), (byte)(myPosition.v + j));
+				newstep = new Position((byte)(myPosition.h+i+(1*i)), (byte)(myPosition.v + j));
 				if (checkStepPosition(newstep) 
 						&& board.isFieldBlockedByFoeKing(amIWhite, newstep))
 					{this.makesCheck=true;break; }
-				newstep = new Position((byte)(myPosition.h+i), (byte)(myPosition.v + j+1));
+				newstep = new Position((byte)(myPosition.h+i), (byte)(myPosition.v + j+(1*j)));
 				if (checkStepPosition(newstep) 
 						&& board.isFieldBlockedByFoeKing(amIWhite, newstep))
 					{this.makesCheck=true;break; }
