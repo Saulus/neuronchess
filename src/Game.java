@@ -30,7 +30,11 @@ public class Game {
 	//returns false if cancelled
 	public boolean play (Board board) {
 		Player isOn = null;
-		do {
+		while (	!isDraw(board) &&
+				!player1.areYouCheckmate() &&
+				!player2.areYouCheckmate() &&
+				(wasCancelled == false))
+		{
 			if (isOn == player1) isOn=player2; else isOn=player1;
 			isOn.yourNewPosition(board);
 			if (isOn.canYouMove()) {
@@ -41,11 +45,7 @@ public class Game {
 					this.allPositions.add(board);
 				}
 			}
-		} while (
-				!isDraw(board) &&
-				!player1.areYouCheckmate() &&
-				!player2.areYouCheckmate() &&
-				(wasCancelled == false));
+		}
 		if (!wasCancelled) {
 			//Decide Winning
 			//1. DRAW

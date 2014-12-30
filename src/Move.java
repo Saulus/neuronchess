@@ -39,12 +39,12 @@ public class Move {
 				Position startturm = new Position((byte)0,startpos.v);
 				Position targetturm = new Position((byte)3,startpos.v);
 				newBoard.setWhoIsOnField(startturm, (byte)0);
-				newBoard.setWhoIsOnField(targetturm, startboard.whoIsOnField(startpos));
+				newBoard.setWhoIsOnField(targetturm, startboard.whoIsOnField(startturm));
 			} else if (startpos.h - targetpos.h == -2) { //Short
 				Position startturm = new Position((byte)7,startpos.v);
 				Position targetturm = new Position((byte)5,startpos.v);
 				newBoard.setWhoIsOnField(startturm, (byte)0);
-				newBoard.setWhoIsOnField(targetturm, startboard.whoIsOnField(startpos));
+				newBoard.setWhoIsOnField(targetturm, startboard.whoIsOnField(startturm));
 			}
 		} else if (Math.abs(figureType) == Consts.turmNumber) {
 			newBoard.setTurmHasMoved(figureType>0,startpos.h);

@@ -64,9 +64,15 @@ public class Board {
 	public Board(byte[][] boardmatrix) {
 		this.boardmatrix = boardmatrix;
 		this.roch = new RochadeMoves();
+		if (boardmatrix[4][0] != Consts.koenigNumber) roch.setKing(true);
+		if (boardmatrix[4][7] != -Consts.koenigNumber) roch.setKing(false);
+		if (boardmatrix[0][0] != Consts.turmNumber) roch.setTurm(true,(byte)0);
+		if (boardmatrix[0][7] != -Consts.turmNumber) roch.setTurm(false,(byte)0);
+		if (boardmatrix[7][0] != Consts.turmNumber) roch.setTurm(true,(byte)7);
+		if (boardmatrix[7][7] != -Consts.turmNumber) roch.setTurm(false,(byte)7);
 	}
 	
-	//Copy Constructror
+	//Copy Constructor
 	public Board(Board otherboard) {
 		byte[][] newmatrix = new byte[Consts.horizontalBoardsize][Consts.verticalBoardsize];
 		//copy array
@@ -150,38 +156,6 @@ public class Board {
 	public void setBoardmatrix (byte[][] matrix) {
 		boardmatrix = matrix;
 	}
-	
-	/* 
-	public byte getFieldValue (int pos) {
-		return boardmatrix[pos];
-	}
-	
-	public void setFieldValue (int pos, byte value) {
-		boardmatrix[pos] = value;
-	}
-	
-	//returns -1 or +1 if any figure is on field
-	public int getFieldValueAllFields (int pos) {
-		//relative position on Field
-		int relPos = pos % Consts.oneFigureSize;
-		int retvalue = 0;
-		for (int i=0; i< Consts.countFigures; i++) {
-			if (boardmatrix[relPos +(i*Consts.oneFigureSize)] !=0) {
-				retvalue += boardmatrix[relPos +(i*Consts.oneFigureSize)];
-				break;
-			}
-		}
-		//add all position values
-		return retvalue;
-	}
-	
-	public void setFieldValueAllFields (int pos, byte value) {
-		//relative position on Field
-		int relPos = pos % Consts.oneFigureSize;
-		for (int i=0; i< Consts.countFigures; i++) {
-			boardmatrix[relPos +(i*Consts.oneFigureSize)] = value;
-		}
-	} */
 	
 	//returns Consts.figureNumer (e.g. Bauernumber) or 0
 	public byte whoIsOnField (Position pos) {

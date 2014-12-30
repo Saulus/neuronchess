@@ -21,7 +21,7 @@ public class NeuronChess {
 		//ToDO
 		NeuronalModel chessmodel = new NeuronalModel();
 		//2. Build new starting position
-		byte[][] newboard = Utils.buildBoardmatrix(Consts.startBoard);
+		byte[][] newboard = Utils.buildBoardmatrix(Consts.testBoard3); //Consts.startBoard
 		//3. Create Players, Position and View
 		View gameView = new View();
 		Board board;

@@ -28,6 +28,10 @@ public final class Consts {
 					"wba2","wbb2","wbc2","wbd2","wbe2","wbf2","wbg2","wbh2",
 					"sba7","sbb7","sbc7","sbd7","sbe7","sbf7","sbg7","sbh7"};
 	
+	public static final String[] testBoard1 = {"wkc6", "skc8", "wbh6"}; //Bauer zur Dame
+	public static final String[] testBoard2 = {"wkb6", "ska8", "wth7", "wlh2"}; //Patt oder Matt
+	public static final String[] testBoard3 = {"wke1", "ske3", "wth1", "wbh2"}; //Rochade
+	
 	public static final String[] horizontalPositions = {"A","B","C","D","E","F","G","H"};
 	public static final String[] verticalPositions = {"1","2","3","4","5","6","7","8"};
 	

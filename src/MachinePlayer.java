@@ -55,14 +55,14 @@ public class MachinePlayer extends Player {
 			//Get probabilities per new Position
 			probs = new Pair[this.myMoves.size()]; //
 			for (int i=0; i<this.myMoves.size(); i++) {
-				probs[i] = new Pair(i, chessmodel.willWhiteWin(this.myMoves.get(i).getBoardmatrix()),this.amIWhite);
+				probs[i] = new Pair(i, chessmodel.willWhiteWin(this.myMoves.get(i).getBoardmatrix()),!this.amIWhite);
 			}
 			//sort
 			Arrays.sort(probs);
 			//get Top acc. to random number
 			moveindex = probs[0].index;
 			if ((probs.length>1) && (randomfloat >= Consts.firstChoise) && (randomfloat < Consts.firstChoise + Consts.secondChoise)) moveindex = probs[1].index;
-			else if (probs.length>2) moveindex = probs[2].index;
+			else if (probs.length>2 && randomfloat >= Consts.firstChoise + Consts.secondChoise) moveindex = probs[2].index;
 			return myMoves.get(moveindex).getBoard();
 		} else return null;
 	}

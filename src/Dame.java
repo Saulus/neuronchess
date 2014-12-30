@@ -43,6 +43,7 @@ public class Dame extends Figure {
 		} while (checkStepPosition(newstep) && !board.isFieldBlockedByFoe(amIWhite, newstep)); //as long as is not blocked
 		//2. TURM
 		//add steps ahead
+		newstep = myPosition;
 		do {
 			newstep = new Position((byte) (newstep.h), (byte) (newstep.v + 1));  //1 step ahead
 			if (checkStepPosition(newstep) 
@@ -118,11 +119,14 @@ public class Dame extends Figure {
 		}
 		//2.TURM
 		//add steps ahead 
-		do {
-			newstep = new Position((byte) (newstep.h), (byte) (newstep.v + 1));  //1 step ahead
-			if (checkStepPosition(newstep) 
-					&& board.isFieldBlockedByFoeKing(amIWhite, newstep)) this.makesCheck=true;
-		} while (checkStepPosition(newstep) && !board.isFieldBlockedByFoe(amIWhite, newstep)); //as long as is not blocked
+		if (!this.makesCheck) {
+			newstep = myPosition;
+			do {
+				newstep = new Position((byte) (newstep.h), (byte) (newstep.v + 1));  //1 step ahead
+				if (checkStepPosition(newstep) 
+						&& board.isFieldBlockedByFoeKing(amIWhite, newstep)) this.makesCheck=true;
+			} while (checkStepPosition(newstep) && !board.isFieldBlockedByFoe(amIWhite, newstep)); //as long as is not blocked
+		}
 		//add steps back
 		if (!this.makesCheck) {
 			newstep = myPosition;
