@@ -1,3 +1,6 @@
+package board;
+import main.Consts;
+
 
 /**
  * 

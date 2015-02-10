@@ -1,3 +1,12 @@
+package main;
+import board.Board;
+import board.Game;
+import board.Utils;
+import models.*;
+import players.HumanPlayer;
+import players.MachinePlayer;
+import players.Player;
+
 /**
  * 
  */
@@ -19,9 +28,9 @@ public class NeuronChess {
         }
 		//1. Read in Model
 		//ToDO
-		NeuronalModel chessmodel = new NeuronalModel();
+		Model chessmodel = new UniformModel();
 		//2. Build new starting position
-		byte[][] newboard = Utils.buildBoardmatrix(Consts.testBoard3); //Consts.startBoard
+		byte[][] newboard = Utils.buildBoardmatrix(Consts.startBoard); //Consts.testBoard3
 		//3. Create Players, Position and View
 		View gameView = new View();
 		Board board;
@@ -33,14 +42,14 @@ public class NeuronChess {
 		do {
 			playmode = gameView.decidePlaymode();
 			if (playmode == 1) {
-				player1 = new MachinePlayer(true,gameView,"Uniform Player", chessmodel);
-				player2 = new HumanPlayer(false,gameView,"Human Player");
+				player1 = new MachinePlayer(true,gameView,chessmodel.getName(), chessmodel);
+				player2 = new HumanPlayer(false,gameView,"Human");
 			} else if (playmode == 2) {
-				player1 = new HumanPlayer(true,gameView,"Human Player");
-				player2 = new MachinePlayer(false,gameView,"Uniform Player",chessmodel);
+				player1 = new HumanPlayer(true,gameView,"Human");
+				player2 = new MachinePlayer(false,gameView,chessmodel.getName(),chessmodel);
 			} else  if (playmode == 3) {
-				player1 = new MachinePlayer(true,gameView,"Uniform Player1",chessmodel);
-				player2 = new MachinePlayer(false,gameView,"Uniform Player2",chessmodel);
+				player1 = new MachinePlayer(true,gameView,chessmodel.getName(),chessmodel);
+				player2 = new MachinePlayer(false,gameView,chessmodel.getName(),chessmodel);
 			} else {
 				gameView.drawCancel();
 				wantsToStop = true;
@@ -50,8 +59,9 @@ public class NeuronChess {
 				board = new Board(newboard);
 				thisGame = new Game(player1,player2,gameView);
 				wantsToStop = !thisGame.play(board);
-				if (!wantsToStop) {
-					//LEARN MODEL
+				if (!wantsToStop && !thisGame.resultIsDraw()) {
+					//LEARN MODEL that has played
+					chessmodel.learn(thisGame.getAllBoardmatrixes(), player1.areYouWhite(), thisGame.resultWhiteHasWon());
 				}
 			}
 		} while (!wantsToStop);

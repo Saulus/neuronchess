@@ -1,5 +1,11 @@
+package board;
 import java.util.ArrayList;
 import java.util.List;
+
+import main.Consts;
+import main.View;
+
+import players.Player;
 
 /**
  * 
@@ -51,15 +57,15 @@ public class Game {
 			//1. DRAW
 			if (isDraw(board)) {
 				whoHasWon = (float)0.5; //DRAW
-				gameView.drawEnd(whoHasWon,"",false);	
+				gameView.drawEnd(this.resultIsDraw(),this.resultWhiteHasWon(),"",false);	
 			}
 			else if (player1.areYouCheckmate()) {
 				whoHasWon = (player2.areYouWhite()) ? 1 : 0;
-				gameView.drawEnd(whoHasWon,player2.getName(),player2.areYouAMachine()&&!player1.areYouAMachine());
+				gameView.drawEnd(this.resultIsDraw(),this.resultWhiteHasWon(),player2.getName(),player2.areYouAMachine()&&!player1.areYouAMachine());
 			}
 			else if (player2.areYouCheckmate()) {
 				whoHasWon = (player1.areYouWhite()) ? 1 : 0;
-				gameView.drawEnd(whoHasWon,player1.getName(),player1.areYouAMachine()&&!player2.areYouAMachine());
+				gameView.drawEnd(this.resultIsDraw(),this.resultWhiteHasWon(),player1.getName(),player1.areYouAMachine()&&!player2.areYouAMachine());
 			}
 		} else gameView.drawCancel();
 		return !wasCancelled;
@@ -85,8 +91,24 @@ public class Game {
 		return whoHasWon;
 	}
 	
+	public boolean resultWhiteHasWon () {
+		return whoHasWon == 1;
+	}
+	
+	public boolean resultIsDraw () {
+		return whoHasWon == 0.5;
+	}
+	
 	public List<Board> getAllPositions() {
 		return allPositions;
+	}
+	
+	public List<byte[][]> getAllBoardmatrixes() {
+		List<byte[][]> allMatrixes = new ArrayList<byte[][]>();
+		for (Board board : this.getAllPositions()) {
+			allMatrixes.add(board.getBoardmatrix());
+		}
+		return allMatrixes;
 	}
 
 }

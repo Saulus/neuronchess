@@ -1,5 +1,8 @@
+package board;
 import java.util.ArrayList;
 import java.util.List;
+
+import main.Consts;
 
 /**
  * 
