@@ -23,6 +23,7 @@ public class Game {
 	private float whoHasWon; //1=White, 0=Black, 0.5=Draw
 	private boolean wasCancelled = false;
 	private View gameView;
+	private int movenumber = 0;
 
 	/**
 	 * 
@@ -35,19 +36,21 @@ public class Game {
 	
 	//returns false if cancelled
 	public boolean play (Board board) {
+		gameView.drawStart(board,player1.getName(),player2.getName());
 		Player isOn = null;
-		while (	!isDraw(board) &&
+		while (	!wasCancelled &&
+				!isDraw(board) &&
 				!player1.areYouCheckmate() &&
-				!player2.areYouCheckmate() &&
-				(wasCancelled == false))
+				!player2.areYouCheckmate())
 		{
 			if (isOn == player1) isOn=player2; else isOn=player1;
+			if (isOn == player1) movenumber++;
 			isOn.yourNewPosition(board);
 			if (isOn.canYouMove()) {
 				board = isOn.makeYourMove();
 				if (board == null) wasCancelled = true;
 				else {
-					isOn.showYourMove();
+					isOn.showYourMove(movenumber);
 					this.allPositions.add(board);
 				}
 			}
@@ -84,6 +87,8 @@ public class Game {
 				(board.howManyFiguresAreLeft()==3 && (
 				Math.abs(board.whoElseIsOnBesidesKings())==Consts.springerNumber ||
 				Math.abs(board.whoElseIsOnBesidesKings())==Consts.laeuferNumber))) return true;
+		//Viel zu lange gespielt: Consts.maxMoves
+		if (movenumber>Consts.maxMoves) return true;
 		return false;
 	}
 

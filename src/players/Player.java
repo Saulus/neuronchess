@@ -20,6 +20,7 @@ public abstract class Player {
 	protected boolean amIWhite;
 	private boolean checkmate = false;
 	private boolean cannotmove = false;
+	protected Board currentBoard;
 	protected List<Move> myMoves;
 	protected int moveindex = 0;
 	protected boolean amIAMachine;
@@ -34,6 +35,7 @@ public abstract class Player {
 	}
 	
 	public void yourNewPosition (Board board) {
+		this.currentBoard=board;
 		this.myMoves = board.getAllMoves(this.amIWhite);
 		this.cannotmove = (myMoves.size() == 0);
 		this.checkmate = (cannotmove) && (board.isCheckForMe(amIWhite));
@@ -51,8 +53,8 @@ public abstract class Player {
 	//to be overwritten by Child-Class
 	public abstract Board makeYourMove();
 	
-	public void showYourMove() {
-		this.gameView.drawMove( myMoves.get(moveindex), amIWhite);
+	public void showYourMove(int movenumber) {
+		this.gameView.drawMove( myMoves.get(moveindex), amIWhite, movenumber);
 	}
 	
 	public boolean areYouWhite() {

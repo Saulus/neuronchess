@@ -22,7 +22,9 @@ public final class Consts {
 	public static final byte springerNumber = 3; 
 	public static final byte turmNumber = 4; 
 	public static final byte dameNumber = 5; 
-	public static final byte koenigNumber = 6; 
+	public static final byte koenigNumber = 6;
+	
+	public static final int maxMoves = 1000; 
 	
 	public static final String[] startBoard = {"wta1", "wth1", "wsb1","wsg1","wlc1","wlf1","wdd1","wke1",
 					"sta8", "sth8", "ssb8","ssg8","slc8","slf8","sdd8","ske8",

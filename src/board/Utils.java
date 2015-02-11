@@ -34,7 +34,7 @@ public final class Utils {
 				case 'b': isWhite = false;  break; //black
 			}
 			figureno = whichFigureType(nextfigure.substring(1,2));
-			figurepos = whichPosition(figureno,nextfigure.substring(2, 4));
+			figurepos = whichPosition(nextfigure.substring(2, 4));
 			if (isWhite) boardmatrix[figurepos.h][figurepos.v] = (byte) (figureno * Consts.whiteFigure);
 				else boardmatrix[figurepos.h][figurepos.v] = (byte) (figureno * Consts.blackFigure);
 		}
@@ -73,7 +73,7 @@ public final class Utils {
 		return figureType;
 	}
 	
-	public final static Position whichPosition(int figureno, String place) {
+	public final static Position whichPosition(String place) {
 		byte vertical = 0;
 		byte horizontal = 0;
 		Position figurepos;

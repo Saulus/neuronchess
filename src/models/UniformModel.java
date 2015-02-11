@@ -18,7 +18,7 @@ public class UniformModel extends Model {
 		this.setName("Uniform");
 	}
 	
-	public double willWhiteWin(byte[][] boardmatrix) {
+	public double willWhiteWin(byte[][] boardmatrix, boolean isWhiteOn) {
 		double randomfloat = Math.random();
 		return randomfloat;
 	}

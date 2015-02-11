@@ -26,9 +26,10 @@ public class NeuronChess {
             System.out.println("Aufruf: java -jar neuronchess.jar");
             System.exit(1);
         }
-		//1. Read in Model
+		//1. Read in Models
 		//ToDO
-		Model chessmodel = new UniformModel();
+		Model uniformmodel = new UniformModel();
+		Model logregmodel = new LogRegModel();
 		//2. Build new starting position
 		byte[][] newboard = Utils.buildBoardmatrix(Consts.startBoard); //Consts.testBoard3
 		//3. Create Players, Position and View
@@ -37,22 +38,33 @@ public class NeuronChess {
 		Player player1 = null;
 		Player player2 = null;
 		Game thisGame;
-		int playmode = 0;
+		int newplaymode = 0;
+		int playmode1 = 0;
+		int playmode2 = 0;
 		boolean wantsToStop = false;
 		do {
-			playmode = gameView.decidePlaymode();
-			if (playmode == 1) {
-				player1 = new MachinePlayer(true,gameView,chessmodel.getName(), chessmodel);
-				player2 = new HumanPlayer(false,gameView,"Human");
-			} else if (playmode == 2) {
-				player1 = new HumanPlayer(true,gameView,"Human");
-				player2 = new MachinePlayer(false,gameView,chessmodel.getName(),chessmodel);
-			} else  if (playmode == 3) {
-				player1 = new MachinePlayer(true,gameView,chessmodel.getName(),chessmodel);
-				player2 = new MachinePlayer(false,gameView,chessmodel.getName(),chessmodel);
-			} else {
-				gameView.drawCancel();
-				wantsToStop = true;
+			newplaymode = gameView.decidePlaymode(true);
+			//playmodeBlack = gameView.decidePlaymode(false);
+			if (newplaymode>-1) playmode1=newplaymode;
+			switch (playmode1) {
+				case 1: player1 =  new HumanPlayer(true,gameView,"Human"); break;
+				case 2: player1 =  new MachinePlayer(true,gameView,uniformmodel.getName(), uniformmodel); break;
+				case 3: player1 =  new MachinePlayer(true,gameView,logregmodel.getName(), logregmodel); break;
+				default: 	gameView.drawCancel();
+							wantsToStop = true;
+							break;
+			}
+			if (!wantsToStop) {
+				if (newplaymode>-1) newplaymode = gameView.decidePlaymode(false);
+				if (newplaymode>-1) playmode2=newplaymode;
+				switch (playmode2) {
+					case 1: player2 =  new HumanPlayer(false,gameView,"Human"); break;
+					case 2: player2 =  new MachinePlayer(false,gameView,uniformmodel.getName(), uniformmodel); break;
+					case 3: player2 =  new MachinePlayer(false,gameView,logregmodel.getName(), logregmodel); break;
+					default: 	gameView.drawCancel();
+								wantsToStop = true;
+								break;
+				}
 			}
 			if (!wantsToStop) {
 				//START GAME
@@ -61,7 +73,16 @@ public class NeuronChess {
 				wantsToStop = !thisGame.play(board);
 				if (!wantsToStop && !thisGame.resultIsDraw()) {
 					//LEARN MODEL that has played
-					chessmodel.learn(thisGame.getAllBoardmatrixes(), player1.areYouWhite(), thisGame.resultWhiteHasWon());
+					MachinePlayer pl;
+					if (player1.areYouAMachine()) {
+						pl = (MachinePlayer)player1; 
+						pl.getChessmodel().learn(thisGame.getAllBoardmatrixes(), pl.areYouWhite(), thisGame.resultWhiteHasWon());
+					}
+					if (player2.areYouAMachine() && !player2.getName().equals(player1.getName())) {
+						pl = (MachinePlayer)player2; 
+						pl.getChessmodel().learn(thisGame.getAllBoardmatrixes(), pl.areYouWhite(), thisGame.resultWhiteHasWon());
+					}
+					//chessmodel.learn(thisGame.getAllBoardmatrixes(), player1.areYouWhite(), thisGame.resultWhiteHasWon());
 				}
 			}
 		} while (!wantsToStop);

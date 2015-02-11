@@ -1,7 +1,6 @@
 package players;
 
 import java.util.Arrays;
-import java.util.Random;
 
 import board.Board;
 
@@ -15,22 +14,21 @@ import models.*;
 
 //Pair Class helps sorting probabilities
 final class Pair implements Comparable<Pair> {
-public final int index;
-public final double value;
-public final int prefix;
+	public final int index;
+	public final double value;
+	public final int prefix;
 
-public Pair(int index, double value, boolean ascending) {
-    this.index = index;
-    this.value = value;
-    if (ascending) this.prefix = 1;
-    else this.prefix = -1;
-}
+	public Pair(int index, double value, boolean ascending) {
+		this.index = index;
+		this.value = value;
+		if (ascending) this.prefix = 1;
+		else this.prefix = -1;
+	}
 
-@Override
-public int compareTo(Pair other) {
-    //multiplied to -1 as the author need descending sort order
-    return prefix * Double.valueOf(this.value).compareTo(other.value);
-}
+	public int compareTo(Pair other) {
+		//multiplied to -1 as the author need descending sort order
+		return prefix * Double.valueOf(this.value).compareTo(other.value);
+	}
 }
 
 /**
@@ -38,7 +36,6 @@ public int compareTo(Pair other) {
  *
  */
 public class MachinePlayer extends Player {
-	private Random randomno = new Random();
 	private Model chessmodel;
 
 	/**
@@ -57,13 +54,13 @@ public class MachinePlayer extends Player {
 	@Override
 	public Board makeYourMove() {
 		//random number for selection of Top3
-		float randomfloat = this.randomno.nextFloat();
+		double randomfloat = Math.random();
 		Pair[] probs;
 		if (this.myMoves.size() != 0) {
 			//Get probabilities per new Position
 			probs = new Pair[this.myMoves.size()]; //
 			for (int i=0; i<this.myMoves.size(); i++) {
-				probs[i] = new Pair(i, chessmodel.willWhiteWin(this.myMoves.get(i).getBoardmatrix()),!this.amIWhite);
+				probs[i] = new Pair(i, chessmodel.willWhiteWin(this.myMoves.get(i).getBoardmatrix(),!this.amIWhite),!this.amIWhite);
 			}
 			//sort
 			Arrays.sort(probs);
@@ -73,6 +70,10 @@ public class MachinePlayer extends Player {
 			else if (probs.length>2 && randomfloat >= Consts.firstChoise + Consts.secondChoise) moveindex = probs[2].index;
 			return myMoves.get(moveindex).getBoard();
 		} else return null;
+	}
+	
+	public Model getChessmodel () {
+		return chessmodel;
 	}
 
 
