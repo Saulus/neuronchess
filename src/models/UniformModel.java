@@ -15,7 +15,7 @@ public class UniformModel extends Model {
 	 * 
 	 */
 	public UniformModel() {
-		this.setName("Uniform");
+		super("Uniform",0);
 	}
 	
 	public double willWhiteWin(byte[][] boardmatrix, boolean isWhiteOn) {

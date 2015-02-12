@@ -37,12 +37,15 @@ public class Game {
 	//returns false if cancelled
 	public boolean play (Board board) {
 		gameView.drawStart(board,player1.getName(),player2.getName());
+		player1.yourNewPosition(board);
+		player2.yourNewPosition(board);
 		Player isOn = null;
 		while (	!wasCancelled &&
 				!isDraw(board) &&
 				!player1.areYouCheckmate() &&
 				!player2.areYouCheckmate())
 		{
+			this.allPositions.add(board);
 			if (isOn == player1) isOn=player2; else isOn=player1;
 			if (isOn == player1) movenumber++;
 			isOn.yourNewPosition(board);
@@ -51,7 +54,6 @@ public class Game {
 				if (board == null) wasCancelled = true;
 				else {
 					isOn.showYourMove(movenumber);
-					this.allPositions.add(board);
 				}
 			}
 		}

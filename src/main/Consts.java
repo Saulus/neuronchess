@@ -9,6 +9,7 @@ package main;
  */
 
 public final class Consts {
+	//Board constants
 	public static final byte blackFigure = -1;
 	public static final byte whiteFigure = 1;
 	public static final byte verticalBoardsize = 8;
@@ -24,8 +25,15 @@ public final class Consts {
 	public static final byte dameNumber = 5; 
 	public static final byte koenigNumber = 6;
 	
+	public static final String[] horizontalPositions = {"A","B","C","D","E","F","G","H"};
+	public static final String[] verticalPositions = {"1","2","3","4","5","6","7","8"};
+	
+	
+	//Game Constants
 	public static final int maxMoves = 1000; 
 	
+	
+	//Some boardpositions
 	public static final String[] startBoard = {"wta1", "wth1", "wsb1","wsg1","wlc1","wlf1","wdd1","wke1",
 					"sta8", "sth8", "ssb8","ssg8","slc8","slf8","sdd8","ske8",
 					"wba2","wbb2","wbc2","wbd2","wbe2","wbf2","wbg2","wbh2",
@@ -35,9 +43,11 @@ public final class Consts {
 	public static final String[] testBoard2 = {"wkb6", "ska8", "wth7", "wlh2"}; //Patt oder Matt
 	public static final String[] testBoard3 = {"wke1", "ske3", "wth1", "wbh2"}; //Rochade
 	
-	public static final String[] horizontalPositions = {"A","B","C","D","E","F","G","H"};
-	public static final String[] verticalPositions = {"1","2","3","4","5","6","7","8"};
 	
+	//Model constants
+	public static final int typeFiguresAsValues = 1; //model type
+	public static final int typeFiguresAsMatrixes = 2; //model type
+		
 	public static final float firstChoise = (float) 0.7; // to decide which move to make
 	public static final float secondChoise = (float) 0.2; // to decide which move to make
 	public static final float thirdChoise = (float) 0.1; // to decide which move to make

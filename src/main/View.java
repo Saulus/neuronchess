@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 import board.Board;
 import board.Move;
 import board.Position;
@@ -20,6 +22,7 @@ import board.Utils;
  */
 public class View {
 	private BufferedReader br  = new BufferedReader(new InputStreamReader(System.in));
+	private boolean outputMoves = true;
 
 	/**
 	 * 
@@ -27,8 +30,8 @@ public class View {
 	public View() {
 	}
 	
-	// 1= Machine is white, 2= Machine is black, 3 = Machine is both
-	public int decidePlaymode (boolean forWhite) {
+	// -1= wiederholen, 1=mensch, 2 =uniform, 3=logreg
+	public int decidePlayer (boolean forWhite) {
 		String color = (forWhite) ? "WEISS" : "SCHWARZ";
 		System.out.println("Wer übernimmt "+color+"?");
 		System.out.print("  m(ensch), u(niform modell), l(ogit modell), w(wiederholen), e(nde): ");
@@ -52,28 +55,50 @@ public class View {
 		 return ret;
 	}
 	
+	public int decideRounds () {
+		System.out.print("Wieviele Spiele? (Default 100) ");
+		String usermove= null;
+		int ret = 0;
+		 boolean correct = false;
+		 do {
+			 try {
+				  usermove = br.readLine();
+			 } catch (IOException ioe) {
+		         System.out.println("IO error!");
+		         System.exit(1);
+		     }
+			 correct = ((usermove.equals("")) || (StringUtils.isNumeric(usermove)));
+		 } while (!correct);
+		 if (usermove.equals("")) ret =100; else return Integer.parseInt(usermove);
+		 return ret;
+	}
+	
 	public void drawBoard(Board board) {
 		
 	}
 	
 	public void drawStart(Board board, String name1, String name2) {
-		this.drawBoard(board);
-		System.out.println();
-		System.out.println("---------------------- "+name1+" against "+name2+" ----------------------");
+		if (outputMoves) {
+			this.drawBoard(board);
+			System.out.println();
+			System.out.println("---------------------- "+name1+" against "+name2+" ----------------------");
+		}
 	}
 	
 	public void drawMove (Move move, boolean amIWhite, int movenumber) {
-		String color = (amIWhite) ? "WEISS" : "SCHWARZ";
-		System.out.print("#"+movenumber+" "+color+": ");
-		System.out.print(Utils.whichFigure(move.getFiguretype()) + Utils.whichPlace(move.getStartpos()) +  " " +  Utils.whichPlace(move.getTargetpos()) +  " ");
-		//Knocked somebody off?
-		if (move.knockedOff() != 0) System.out.print("#"+Utils.whichFigure(move.knockedOff()) +  " ");
-		//Magic Bauer to Dame?
-		if (move.getFiguretype() != move.getBoard().whoIsOnField(move.getTargetpos()))
-			System.out.print("->"+Utils.whichFigure(move.getBoard().whoIsOnField(move.getTargetpos())) +  " ");
-		//Checkmate or check?
-		if (move.isCheckForFoe(amIWhite)) System.out.println("+");
-		else System.out.println();
+		if (outputMoves) {
+			String color = (amIWhite) ? "WEISS" : "SCHWARZ";
+			System.out.print("#"+movenumber+" "+color+": ");
+			System.out.print(Utils.whichFigure(move.getFiguretype()) + Utils.whichPlace(move.getStartpos()) +  " " +  Utils.whichPlace(move.getTargetpos()) +  " ");
+			//Knocked somebody off?
+			if (move.knockedOff() != 0) System.out.print("#"+Utils.whichFigure(move.knockedOff()) +  " ");
+			//Magic Bauer to Dame?
+			if (move.getFiguretype() != move.getBoard().whoIsOnField(move.getTargetpos()))
+				System.out.print("->"+Utils.whichFigure(move.getBoard().whoIsOnField(move.getTargetpos())) +  " ");
+			//Checkmate or check?
+			if (move.isCheckForFoe(amIWhite)) System.out.println("+");
+			else System.out.println();
+		}
 	}
 	
 	//usermove must be something like "Sa1 b1" or "Sa1b1" or "Sb1" or "a1b1"
@@ -130,21 +155,42 @@ public class View {
 	}
 	
 	public void drawEnd(boolean isDraw, boolean hasWhiteWon, String winner, boolean hasMachineWonAgainstHuman) {
-		System.out.print("And the Winner is...");
-		if (isDraw) {
-			System.out.println("Niemand, unentschieden.");
-		} else if (hasWhiteWon) {
-			System.out.println("Weiss!");
-			System.out.println("Congrats, "+winner+"!");
-		} else {
-			System.out.println("Schwarz!");
-			System.out.println("Congrats, "+winner+"!");
+		if (outputMoves) {
+			System.out.print("And the Winner is...");
+			if (isDraw) {
+				System.out.println("Niemand, unentschieden.");
+			} else if (hasWhiteWon) {
+				System.out.println("Weiss!");
+				System.out.println("Congrats, "+winner+"!");
+			} else {
+				System.out.println("Schwarz!");
+				System.out.println("Congrats, "+winner+"!");
+			}
+			if (hasMachineWonAgainstHuman) System.out.println("HAHAHAHA! LOOOOOSER!");
+			System.out.println();
 		}
-		if (hasMachineWonAgainstHuman) System.out.println("HAHAHAHA! LOOOOOSER!");
+	}
+	
+	public void drawStats(int whiteNo, String white, int blackNo, String black, int drawNo) { 
+		int gesamt = whiteNo+blackNo+drawNo;
+		System.out.println();
+		System.out.println("---------------------- Statistik ----------------------");
+		System.out.println("Weiss ("+white+") | Schwarz ("+black+") | Unentschieden");
+		System.out.println(whiteNo+" ("+Math.round((float)whiteNo/gesamt*100)+"%) | "
+							+blackNo+" ("+Math.round((float)blackNo/gesamt*100)+"%) | "
+							+drawNo+" ("+Math.round((float)drawNo/gesamt*100)+"%)");
 		System.out.println();
 	}
 	
 	public void drawCancel() {
 		System.out.println("Schade, dass Du aufhörst. Komm wieder - ICH MUSS LERNEN.");
+	}
+	
+	public void drawGameNo(int game) {
+		System.out.print("Spiel: "+game+"\r");
+	}
+	
+	public void setOutputMoves (boolean set) {
+		this.outputMoves=set;
 	}
 }

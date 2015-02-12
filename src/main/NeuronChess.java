@@ -41,10 +41,13 @@ public class NeuronChess {
 		int newplaymode = 0;
 		int playmode1 = 0;
 		int playmode2 = 0;
+		int rounds = 0;
+		int statsWhite = 0;
+		int statsBlack = 0;
+		int statsDraw = 0;
 		boolean wantsToStop = false;
 		do {
-			newplaymode = gameView.decidePlaymode(true);
-			//playmodeBlack = gameView.decidePlaymode(false);
+			newplaymode = gameView.decidePlayer(true);
 			if (newplaymode>-1) playmode1=newplaymode;
 			switch (playmode1) {
 				case 1: player1 =  new HumanPlayer(true,gameView,"Human"); break;
@@ -55,7 +58,7 @@ public class NeuronChess {
 							break;
 			}
 			if (!wantsToStop) {
-				if (newplaymode>-1) newplaymode = gameView.decidePlaymode(false);
+				if (newplaymode>-1) newplaymode = gameView.decidePlayer(false);
 				if (newplaymode>-1) playmode2=newplaymode;
 				switch (playmode2) {
 					case 1: player2 =  new HumanPlayer(false,gameView,"Human"); break;
@@ -67,23 +70,35 @@ public class NeuronChess {
 				}
 			}
 			if (!wantsToStop) {
-				//START GAME
-				board = new Board(newboard);
-				thisGame = new Game(player1,player2,gameView);
-				wantsToStop = !thisGame.play(board);
-				if (!wantsToStop && !thisGame.resultIsDraw()) {
-					//LEARN MODEL that has played
-					MachinePlayer pl;
-					if (player1.areYouAMachine()) {
-						pl = (MachinePlayer)player1; 
-						pl.getChessmodel().learn(thisGame.getAllBoardmatrixes(), pl.areYouWhite(), thisGame.resultWhiteHasWon());
+				if (newplaymode>-1) rounds = gameView.decideRounds();
+				gameView.setOutputMoves(!(rounds>3));
+				statsWhite = 0;
+				statsBlack = 0;
+				statsDraw = 0;
+				for (int i=1;i<=rounds && !wantsToStop;i++) {
+					//START GAME
+					gameView.drawGameNo(i);
+					board = new Board(newboard);
+					thisGame = new Game(player1,player2,gameView);
+					wantsToStop = !thisGame.play(board);
+					if (!wantsToStop && !thisGame.resultIsDraw()) {
+						//LEARN MODEL that has played
+						MachinePlayer pl;
+						if (player1.areYouAMachine()) {
+							pl = (MachinePlayer)player1; 
+							pl.getChessmodel().learn(thisGame.getAllBoardmatrixes(), player1.areYouWhite(), thisGame.resultWhiteHasWon());
+						}
+						if (player2.areYouAMachine() && !player2.getName().equals(player1.getName())) {
+							pl = (MachinePlayer)player2; 
+							pl.getChessmodel().learn(thisGame.getAllBoardmatrixes(), player1.areYouWhite(), thisGame.resultWhiteHasWon());
+						}
 					}
-					if (player2.areYouAMachine() && !player2.getName().equals(player1.getName())) {
-						pl = (MachinePlayer)player2; 
-						pl.getChessmodel().learn(thisGame.getAllBoardmatrixes(), pl.areYouWhite(), thisGame.resultWhiteHasWon());
-					}
-					//chessmodel.learn(thisGame.getAllBoardmatrixes(), player1.areYouWhite(), thisGame.resultWhiteHasWon());
+					if (thisGame.resultIsDraw()) statsDraw++;
+					else if (thisGame.resultWhiteHasWon()) statsWhite++;
+					else statsBlack++;
 				}
+				//output statistik
+				gameView.drawStats(statsWhite,player1.getName(),statsBlack,player2.getName(),statsDraw);
 			}
 		} while (!wantsToStop);
 	}
