@@ -10,6 +10,12 @@ import static org.nd4j.linalg.ops.transforms.Transforms.*;
 import main.Consts;
 
 public class LogRegModel extends Model {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	public static final String name = "logreg";
 	private INDArray thetas ;
 	
 	private int iterations = 50; //per Mini-Batch (= 1 game)
@@ -20,7 +26,7 @@ public class LogRegModel extends Model {
 	
 
 	public LogRegModel() {
-		super("LogReg",Consts.typeFiguresAsMatrixes);
+		super(Consts.typeFiguresAsMatrixes);
 		this.initThetas();
 	}
 	

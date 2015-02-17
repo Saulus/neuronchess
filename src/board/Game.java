@@ -3,9 +3,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import main.Consts;
-import main.View;
 
 import players.Player;
+import views.*;
 
 /**
  * 
@@ -20,10 +20,11 @@ public class Game {
 	private Player player1;
 	private Player player2;
 	private List<Board> allPositions = new ArrayList<Board>();
-	private float whoHasWon; //1=White, 0=Black, 0.5=Draw
+	private int whoHasWon; //1=Player1, 2=Player2, 0=Draw
 	private boolean wasCancelled = false;
 	private View gameView;
-	private int movenumber = 0;
+	private int movenumber =0;
+	private int countmoves = 0; //for fifty move rule (w/o pawn or capture)
 
 	/**
 	 * 
@@ -51,6 +52,8 @@ public class Game {
 			isOn.yourNewPosition(board);
 			if (isOn.canYouMove()) {
 				board = isOn.makeYourMove();
+				if (isOn.whatIsYourMove().getFiguretype() == Consts.bauerNumber || isOn.whatIsYourMove().knockedOff() != 0) countmoves = 0;
+				else countmoves++;
 				if (board == null) wasCancelled = true;
 				else {
 					isOn.showYourMove(movenumber);
@@ -61,15 +64,15 @@ public class Game {
 			//Decide Winning
 			//1. DRAW
 			if (isDraw(board)) {
-				whoHasWon = (float)0.5; //DRAW
+				whoHasWon = 0; //DRAW
 				gameView.drawEnd(this.resultIsDraw(),this.resultWhiteHasWon(),"",false);	
 			}
 			else if (player1.areYouCheckmate()) {
-				whoHasWon = (player2.areYouWhite()) ? 1 : 0;
+				whoHasWon = 2;
 				gameView.drawEnd(this.resultIsDraw(),this.resultWhiteHasWon(),player2.getName(),player2.areYouAMachine()&&!player1.areYouAMachine());
 			}
 			else if (player2.areYouCheckmate()) {
-				whoHasWon = (player1.areYouWhite()) ? 1 : 0;
+				whoHasWon = 1;
 				gameView.drawEnd(this.resultIsDraw(),this.resultWhiteHasWon(),player1.getName(),player1.areYouAMachine()&&!player2.areYouAMachine());
 			}
 		} else gameView.drawCancel();
@@ -80,30 +83,32 @@ public class Game {
 		if ((!player1.canYouMove()) && (!player2.canYouMove())) return true;
 		if ((!player1.canYouMove()) && (!player1.areYouCheckmate())) return true;
 		if ((!player2.canYouMove()) && (!player2.areYouCheckmate())) return true;
-		//3mal gleicher Zug
-		if (allPositions.size()>=5 &&
-			allPositions.get(allPositions.size()-1).equals(allPositions.get(allPositions.size()-2)) &&
-			allPositions.get(allPositions.size()-2).equals(allPositions.get(allPositions.size()-3))) return true;
+		//3mal gleicher Zug TODO
+		if (allPositions.size()>=8 &&
+			board.equals(allPositions.get(allPositions.size()-4)) &&
+			board.equals(allPositions.get(allPositions.size()-8))) return true;
 		//Nur noch Könige und Läufer oder Springer
 		if (board.howManyFiguresAreLeft()==2 ||
 				(board.howManyFiguresAreLeft()==3 && (
 				Math.abs(board.whoElseIsOnBesidesKings())==Consts.springerNumber ||
 				Math.abs(board.whoElseIsOnBesidesKings())==Consts.laeuferNumber))) return true;
-		//Viel zu lange gespielt: Consts.maxMoves
-		if (movenumber>Consts.maxMoves) return true;
+		//Fünfzig-Züge-Regel
+		if (countmoves>=100) return true;
 		return false;
 	}
 
-	public float whoHasWon() {
+	public int whoHasWon() {
 		return whoHasWon;
 	}
 	
 	public boolean resultWhiteHasWon () {
-		return whoHasWon == 1;
+		if (whoHasWon==1 && player1.areYouWhite()) return true;
+		else if (whoHasWon==2 && player2.areYouWhite()) return true;
+		return false;
 	}
 	
 	public boolean resultIsDraw () {
-		return whoHasWon == 0.5;
+		return whoHasWon == 0;
 	}
 	
 	public List<Board> getAllPositions() {
@@ -117,5 +122,22 @@ public class Game {
 		}
 		return allMatrixes;
 	}
+	
+	public void cancel () {
+		wasCancelled = true;
+	}
+	
+	public boolean wasCancelled () {
+		return wasCancelled;
+	}
+	
+	public Player getPlayer1 () {
+		return player1;
+	}
+	
+	public Player getPlayer2 () {
+		return player2;
+	}
+	
 
 }

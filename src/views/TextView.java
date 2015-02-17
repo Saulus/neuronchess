@@ -1,13 +1,22 @@
-package main;
+package views;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
 
+import main.Consts;
+import models.LogRegModel;
+import models.UniformModel;
+
 import org.apache.commons.lang3.StringUtils;
 
+import players.HumanPlayer;
+import players.MachinePlayer;
+import players.Player;
+
 import board.Board;
+import board.Game;
 import board.Move;
 import board.Position;
 import board.Utils;
@@ -20,15 +29,98 @@ import board.Utils;
  * @author Paul
  *
  */
-public class View {
+public class TextView extends View {
 	private BufferedReader br  = new BufferedReader(new InputStreamReader(System.in));
-	private boolean outputMoves = true;
 
 	/**
 	 * 
 	 */
-	public View() {
+	public TextView() {
+		super(); //load models & init gui
 	}
+	
+	public void initializeGui() {
+		if (outputMoves) {
+			System.out.println();
+			System.out.println("---------------------- NeuronChess - Learn it yourself ----------------------");
+		}
+	}
+	
+	public void setupnewgame() {
+		Player player1 = null;
+		Player player2 = null;
+		int newplaymode = 0;
+		int playmode1 = 0;
+		int playmode2 = 0;
+		int rounds = 0;
+		int statsWhite = 0;
+		int statsBlack = 0;
+		int statsDraw = 0;
+		boolean wantsToStop = false;
+		do {
+			newplaymode = decidePlayer(true);
+			if (newplaymode>-1) playmode1=newplaymode;
+			switch (playmode1) {
+				case 1: player1 =  new HumanPlayer(true,this,"Human"); break;
+				case 2: player1 =  new MachinePlayer(true,this,UniformModel.name, models.get(UniformModel.name)); break;
+				case 3: player1 =  new MachinePlayer(true,this,LogRegModel.name, models.get(LogRegModel.name)); break;
+				default: 	drawCancel();
+							wantsToStop = true;
+							break;
+			}
+			if (!wantsToStop) {
+				if (newplaymode>-1) newplaymode = decidePlayer(false);
+				if (newplaymode>-1) playmode2=newplaymode;
+				switch (playmode2) {
+					case 1: player2 =  new HumanPlayer(false,this,"Human"); break;
+					case 2: player2 =  new MachinePlayer(false,this,UniformModel.name, models.get(UniformModel.name)); break;
+					case 3: player2 =  new MachinePlayer(false,this,LogRegModel.name, models.get(LogRegModel.name)); break;
+					default: 	drawCancel();
+								wantsToStop = true;
+								break;
+				}
+			}
+			if (!wantsToStop) {
+				if (newplaymode>-1) rounds = decideRounds();
+				setOutputMoves(!(rounds>3));
+				statsWhite = 0;
+				statsBlack = 0;
+				statsDraw = 0;
+				for (int i=1;i<=rounds && !wantsToStop;i++) {
+					//START GAME
+					drawGameNo(i);
+					wantsToStop = !startNewGame(player1,player2);
+					if (!wantsToStop && !thisGame.resultIsDraw()) {
+						//LEARN MODEL that has played
+						MachinePlayer pl;
+						if (player1.areYouAMachine()) {
+							pl = (MachinePlayer)player1; 
+							pl.getChessmodel().learn(thisGame.getAllBoardmatrixes(), player1.areYouWhite(), thisGame.resultWhiteHasWon());
+						}
+						if (player2.areYouAMachine() && !player2.getName().equals(player1.getName())) {
+							pl = (MachinePlayer)player2; 
+							pl.getChessmodel().learn(thisGame.getAllBoardmatrixes(), player1.areYouWhite(), thisGame.resultWhiteHasWon());
+						}
+					}
+					if (thisGame.resultIsDraw()) statsDraw++;
+					else if (thisGame.resultWhiteHasWon()) statsWhite++;
+					else statsBlack++;
+				}
+				//output statistik
+				drawStats(statsWhite,player1.getName(),statsBlack,player2.getName(),statsDraw);
+			}
+		} while (!wantsToStop);
+	}
+	
+	
+	public boolean startNewGame (Player player1, Player player2) {
+		//START GAME
+		Board board = new Board(Utils.buildBoardmatrix(Consts.startBoard));//Consts.testBoard3
+		thisGame = new Game(player1,player2,this);
+		return thisGame.play(board);
+	}
+	
+	
 	
 	// -1= wiederholen, 1=mensch, 2 =uniform, 3=logreg
 	public int decidePlayer (boolean forWhite) {
@@ -188,9 +280,5 @@ public class View {
 	
 	public void drawGameNo(int game) {
 		System.out.print("Spiel: "+game+"\r");
-	}
-	
-	public void setOutputMoves (boolean set) {
-		this.outputMoves=set;
 	}
 }

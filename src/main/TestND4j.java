@@ -5,9 +5,14 @@ import static org.nd4j.linalg.ops.transforms.Transforms.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
+
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.util.ArrayUtil;
+
+import views.ChessGUI;
 
 public class TestND4j {
 	
@@ -71,6 +76,35 @@ public class TestND4j {
 	 */
 	public static void main(String[] args) {
 		
+		/*View*/
+	        Runnable r = new Runnable() {
+
+	            public void run() {
+	                ChessGUI cg = new ChessGUI();
+
+	                JFrame f = new JFrame("ChessChamp");
+	                f.add(cg.getGui());
+	                // Ensures JVM closes after frame(s) closed and
+	                // all non-daemon threads are finished
+	                f.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+	                // See http://stackoverflow.com/a/7143398/418556 for demo.
+	                f.setLocationByPlatform(true);
+
+	                // ensures the frame is the minimum size it needs to be
+	                // in order display the components within it
+	                f.pack();
+	                // ensures the minimum size is enforced.
+	                f.setMinimumSize(f.getSize());
+	                f.setVisible(true);
+	            }
+	        };
+	        // Swing GUIs should be created and updated on the EDT
+	        // http://docs.oracle.com/javase/tutorial/uiswing/concurrency
+	     SwingUtilities.invokeLater(r);
+	     
+		
+		
+		/*
 		int featureNo =4;
 		int sampleNo = 2;
 		INDArray thetas = Nd4j.ones(featureNo,1);
@@ -90,7 +124,7 @@ public class TestND4j {
 		thetas = learn(features,targets,thetas);
 		System.out.println("Thetas: "+thetas);
 		System.out.println("Costs: "+calcCosts(features,targets,thetas));
-		
+		*/
 		/*
 		INDArray nd = Nd4j.create(new double[]{1, 2, 3}, new int[]{1, 3});
 		INDArray nd2 = Nd4j.create(new double[]{6,7,8},new int[]{1,3});
@@ -135,7 +169,7 @@ public class TestND4j {
 		System.out.println(ndv); // of the new rows and columns equals the product of the old; e.g. 2 * 6 = 3 * 4
 		ndv = nd2.transpose(); // one more transpose just for fun.
 		System.out.println(ndv);
-		ndv = nd2.linearView(); //make the matrix one long line
+		ndv = nd2.linearView(); //make the matrix )one long line
 		System.out.println(ndv);
 		nd2 = Nd4j.create(new float[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}); //now we want a linear matrix, i.e. a row vector
 		System.out.println(nd2);

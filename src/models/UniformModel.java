@@ -10,12 +10,17 @@ import java.util.List;
  *
  */
 public class UniformModel extends Model {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	public static final String name = "uniform";
 
 	/**
 	 * 
 	 */
 	public UniformModel() {
-		super("Uniform",0);
+		super(0);
 	}
 	
 	public double willWhiteWin(byte[][] boardmatrix, boolean isWhiteOn) {

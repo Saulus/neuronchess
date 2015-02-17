@@ -2,10 +2,11 @@ package players;
 
 import java.util.List;
 
+import views.*;
+
 import board.Board;
 import board.Move;
 
-import main.View;
 
 /**
  * 
@@ -66,6 +67,10 @@ public abstract class Player {
 	}
 	public String getName() {
 		return name;
+	}
+	
+	public Move whatIsYourMove() {
+		return myMoves.get(moveindex);
 	}
 
 }

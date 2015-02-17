@@ -1,6 +1,7 @@
 package players;
+import views.TextView;
+import views.View;
 import board.Board;
-import main.View;
 
 /**
  * 

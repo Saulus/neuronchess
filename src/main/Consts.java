@@ -30,7 +30,7 @@ public final class Consts {
 	
 	
 	//Game Constants
-	public static final int maxMoves = 1000; 
+	public static final String humanPlayer = "mensch";
 	
 	
 	//Some boardpositions
@@ -45,6 +45,7 @@ public final class Consts {
 	
 	
 	//Model constants
+	public static final String[] modeltypes = {"uniform","logreg"};
 	public static final int typeFiguresAsValues = 1; //model type
 	public static final int typeFiguresAsMatrixes = 2; //model type
 		

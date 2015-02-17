@@ -2,10 +2,11 @@ package players;
 
 import java.util.Arrays;
 
+import views.*;
+
 import board.Board;
 
 import main.Consts;
-import main.View;
 import models.*;
 
 /**

@@ -7,14 +7,17 @@ import main.Consts;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
-public abstract class Model {
+public abstract class Model implements java.io.Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private String name;
 	/* configure model as follows */
 	private int chooseFeatureType;
 	private int featureNo = 0;
 
-	public Model(String name, int chooseFeatureType) {
-		this.setName(name);
+	public Model(int chooseFeatureType) {
 		this.setFetureType(chooseFeatureType);
 	}
 	
@@ -43,10 +46,6 @@ public abstract class Model {
 	
 	public String getName() {
 		return name;
-	}
-	
-	public void setName(String n) {
-		name=n;
 	}
 	
 	/**
