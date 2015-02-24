@@ -60,7 +60,7 @@ public class GuiView extends View {
     		{"0","0","0"},
         	{"0%","0%","0%"}
         };
-    private final int[] statsdataraw = {0,0,0};
+    private final int[] statsdataraw = {0,0,0}; //player 1, p2, daw
     private JTable statstable;
     private JTextArea gamelog = new JTextArea(); 
     private static final String COLS = "ABCDEFGH";
@@ -68,8 +68,12 @@ public class GuiView extends View {
 
 	public GuiView() {
 		  super();
+		  setSwing(true);
 		  initializeGui();
 	}
+	
+	
+	/***************** GUI *************************/
 	
 	 public final void initializeGui() {
 	        // create the images for the chess pieces
@@ -87,20 +91,18 @@ public class GuiView extends View {
 	        p1comboBox = new JComboBox<>(choicesarr);
 	        Action comboAction = new AbstractAction("Player1") {
 	            public void actionPerformed(ActionEvent e) {
-	                setPlayer(1,(String) ((JComboBox<String>)e.getSource()).getSelectedItem());
+	                setPlayer();
 	            }
 	        };
-	        
-	      //Buttons
-	        p1comboBox.addActionListener(comboAction);
 	        p1comboBox.setEditable(false);
 	        p1comboBox.setSelectedIndex(0);
+	        p1comboBox.addActionListener(comboAction);
 	        tools.add(p1comboBox);
 	        tools.add(new JLabel("vs."));
 	        p2comboBox = new JComboBox<>(choicesarr);
-	        p2comboBox.addActionListener(comboAction);
 	        p2comboBox.setEditable(false);
 	        p2comboBox.setSelectedIndex(0);
+	        p2comboBox.addActionListener(comboAction);
 	        tools.add(p2comboBox);
 	        tools.addSeparator();
 	        Action newGameAction = new AbstractAction("Starte neu") {
@@ -214,11 +216,11 @@ public class GuiView extends View {
 	                if ((jj % 2 == 1 && ii % 2 == 1)
 	                        //) {
 	                        || (jj % 2 == 0 && ii % 2 == 0)) {
-	                    b.setBackground(Color.WHITE);
-	                } else {
 	                    b.setBackground(Color.BLACK);
+	                } else {
+	                    b.setBackground(Color.WHITE);
 	                }
-	                chessBoardSquares[jj][ii] = b;
+	                chessBoardSquares[ii][jj] = b;
 	            }
 	        }
 
@@ -227,20 +229,20 @@ public class GuiView extends View {
 	         */
 	        chessBoard.add(new JLabel(""));
 	        // fill the top row
-	        for (int ii = 0; ii < 8; ii++) {
+	        for (int ii = 0; ii < Consts.horizontalBoardsize; ii++) {
 	            chessBoard.add(
 	                    new JLabel(COLS.substring(ii, ii + 1),
 	                    SwingConstants.CENTER));
 	        }
 	        // fill the black non-pawn piece row
-	        for (int ii = 0; ii < 8; ii++) {
-	            for (int jj = 0; jj < 8; jj++) {
+	        for (int ii = 0; ii < Consts.horizontalBoardsize; ii++) {
+	            for (int jj = 0; jj < Consts.verticalBoardsize; jj++) {
 	                switch (jj) {
-	                    case 0:
+	                    case 7:
 	                        chessBoard.add(new JLabel("" + (9-(ii + 1)),
 	                                SwingConstants.CENTER));
 	                    default:
-	                        chessBoard.add(chessBoardSquares[jj][ii]);
+	                        chessBoard.add(chessBoardSquares[ii][jj]);
 	                }
 	            }
 	        }
@@ -256,8 +258,8 @@ public class GuiView extends View {
 				 chessPieceImages[ii][Consts.laeuferNumber-1] = bi.getSubimage(4 * 64, ii * 64, 64, 64);
 				 chessPieceImages[ii][Consts.springerNumber-1] = bi.getSubimage(3 * 64, ii * 64, 64, 64);
 				 chessPieceImages[ii][Consts.turmNumber-1] = bi.getSubimage(2 * 64, ii * 64, 64, 64);
-				 chessPieceImages[ii][Consts.dameNumber-1] = bi.getSubimage(0 * 64, ii * 64, 64, 64);
-				 chessPieceImages[ii][Consts.koenigNumber-1] = bi.getSubimage(1 * 64, ii * 64, 64, 64);
+				 chessPieceImages[ii][Consts.dameNumber-1] = bi.getSubimage(1 * 64, ii * 64, 64, 64);
+				 chessPieceImages[ii][Consts.koenigNumber-1] = bi.getSubimage(0 * 64, ii * 64, 64, 64);
 			 }
 		 } catch (Exception e) {
 			 e.printStackTrace();
@@ -265,9 +267,28 @@ public class GuiView extends View {
 		 }
 	 }
 	 
-	 private void setPlayer(int id, String player) {
+	 /***************** Action Buttons *************************/
+	 
+	 private void setPlayer() {
 		 //reset gamenumber and stats
-		 
+		 statsdataraw[0]=0;
+		 statsdataraw[1]=0;
+		 statsdataraw[2]=0;
+		 gamenumber=0;
+		 drawStats();
+	 }
+	 
+	 private void startSingleGame() {
+		 setOutputMoves(true);
+		 //refresh gamelog
+		 gamelog.setText("");
+		 gamenumber++;
+		 gamelog.append("Spiel #"+gamenumber+newline);
+		 //cancel old game;
+		 if (thisGame != null) thisGame.cancel();
+		 Player player1 = decidePlayer(1);
+		 Player player2 = decidePlayer(2);
+		 doNewGame(player1,player2);
 	 }
 	 
 	 private void startLearning() {
@@ -278,36 +299,105 @@ public class GuiView extends View {
 		 
 	 }
 	 
-	 private void startSingleGame() {
-		 setOutputMoves(true);
-		 //refresh gamelog
-		 gamelog.setText("");
-		 gamenumber++;
-		 gamelog.append("Spiel #"+gamenumber+newline);
-		 doNewGame();
-	 }
+	 /***************** View Interface methods *************************/
 	 
-	 /**
-	  * Initializes the icons of the initial chess board piece places
-	  */
-	 private void doNewGame() {
-		//cancel old game;
-		cancel();
-		Player player1 = decidePlayer(1);
-		Player player2 = decidePlayer(2);
-		
-		//START GAME
-		Board board = new Board(Utils.buildBoardmatrix(Consts.startBoard));//Consts.testBoard3
-		thisGame = new Game(player1,player2,(View)this);
-		boolean wantsToStop = !thisGame.play(board);
-		if (!wantsToStop) {
-			if (!thisGame.resultIsDraw()) {
-				learn(thisGame);
-				addStatsPlayer(thisGame.whoHasWon());
+	 public void drawStart(Board board, String name1, String name2) {
+			statusmessage.setText("Spiele "+name1 + " against "+ name2);
+			drawBoard(board);
+		}
+
+		public void drawMove (Move move, boolean amIWhite, int movenumber) {
+			if (outputMoves) {
+				String color = (amIWhite) ? "WEISS" : "SCHWARZ";
+				String thisline = "#"+movenumber+" "+color+": " +
+						Utils.whichFigure(move.getFiguretype()) + Utils.whichPlace(move.getStartpos()) +  " "
+						+  Utils.whichPlace(move.getTargetpos()) +  " ";
+				//Knocked somebody off?
+				if (move.knockedOff() != 0) thisline = thisline + "#"+Utils.whichFigure(move.knockedOff()) +  " ";
+				//Magic Bauer to Dame?
+				if (move.getFiguretype() != move.getBoard().whoIsOnField(move.getTargetpos()))
+					thisline = thisline + "->"+Utils.whichFigure(move.getBoard().whoIsOnField(move.getTargetpos())) +  " ";
+				//Checkmate or check?
+				if (move.isCheckForFoe(amIWhite)) thisline = thisline + "+";
+				gamelog.append(thisline+newline);
+				drawBoard(move.getBoard());
+				try {
+				    Thread.sleep(2000);                 //1000 milliseconds is one second.
+				} catch(InterruptedException ex) {
+				    Thread.currentThread().interrupt();
+				}
 			}
-			else addStatsDraw();
+		}
+
+		//returns moveindex
+		public int getHumanInput (Board board, List<Move> possibleMoves, boolean forWhite) {
+			//repeat until thisGame.wasCancelled;
+			return 0;
+			
+		}
+
+		public void drawEnd(boolean isDraw, int whoHasWon) {
+			if (outputMoves) {
+				String thisline = "And the Winner is..."+newline;
+				if (isDraw) {
+					thisline = thisline + "Niemand, unentschieden.";
+				} else if (whoHasWon==1) {
+					String weiss = (thisGame.getPlayer1().areYouWhite()) ? "Weiss" : "Schwarz";
+					thisline = thisline + weiss+newline;
+					thisline = thisline + "Congrats, "+thisGame.getPlayer1().getName()+"!";
+				} else {
+					String weiss = (thisGame.getPlayer2().areYouWhite()) ? "Weiss" : "Schwarz";
+					thisline = thisline + weiss+newline;
+					thisline = thisline + "Congrats, "+thisGame.getPlayer2().getName()+"!";
+				}
+				gamelog.append(thisline+newline);
+			}
+			if (!isDraw) {
+				learn(thisGame);
+				addStatsPlayer(whoHasWon);
+			} else addStatsDraw();
 			drawStats();
 		}
+
+		public void drawCancel() {
+			
+		}
+	 
+		
+	 /***************** Helpers *************************/
+	 
+	 private void doNewGame(Player p1, Player p2) {
+		//START GAME
+		Board board = new Board(Utils.buildBoardmatrix(Consts.startBoard));//Consts.testBoard3
+		thisGame = new Game(board,p1,p2,(View)this);
+		thisGame.start();
+	 }
+	 
+	 public Player decidePlayer (int playerno) {
+			Player pl = null;
+			JComboBox<String> combo;
+			if (playerno==1) combo = p1comboBox;
+			else combo = p2comboBox;
+			
+			//Player 1 will always be white!
+			if (combo.getSelectedItem().toString().equals(Consts.humanPlayer)) pl =  new HumanPlayer(playerno==1,this,Consts.humanPlayer);
+				else pl =  new MachinePlayer(playerno==1,this,combo.getSelectedItem().toString(), models.get(combo.getSelectedItem().toString()));
+			
+			return pl;
+		}
+	 
+	 
+	 private void learn(Game myGame) {
+		//LEARN MODEL that has played
+		 MachinePlayer pl;
+		 if (myGame.getPlayer1().areYouAMachine()) {
+			 pl = (MachinePlayer)myGame.getPlayer1(); 
+			 pl.getChessmodel().learn(myGame.getAllBoardmatrixes(), myGame.getPlayer1().areYouWhite(), myGame.resultWhiteHasWon());
+		 }
+		 if (myGame.getPlayer2().areYouAMachine() && !myGame.getPlayer2().getName().equals(myGame.getPlayer1().getName())) {
+			 pl = (MachinePlayer)myGame.getPlayer2(); 
+			 pl.getChessmodel().learn(myGame.getAllBoardmatrixes(), myGame.getPlayer1().areYouWhite(), myGame.resultWhiteHasWon());
+		 }
 	 }
 	 
 	 private void drawBoard(Board board) {
@@ -321,25 +411,6 @@ public class GuiView extends View {
 					 chessBoardSquares[i][j].setIcon(new ImageIcon(chessPieceImages[1][Math.abs(board.whoIsOnField(pos))-1]));
 				 else chessBoardSquares[i][j].setIcon(new ImageIcon(new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB)));
 			 }
-		 }
-	 }
-	 
-	 public void cancel() {
-		 //cancel game
-		 if (thisGame != null) thisGame.cancel();
-	 }
-	 
-	 
-	 private void learn(Game myGame) {
-		//LEARN MODEL that has played
-		 MachinePlayer pl;
-		 if (myGame.getPlayer1().areYouAMachine()) {
-			 pl = (MachinePlayer)myGame.getPlayer1(); 
-			 pl.getChessmodel().learn(myGame.getAllBoardmatrixes(), myGame.getPlayer1().areYouWhite(), myGame.resultWhiteHasWon());
-		 }
-		 if (myGame.getPlayer2().areYouAMachine() && !myGame.getPlayer2().getName().equals(myGame.getPlayer1().getName())) {
-			 pl = (MachinePlayer)myGame.getPlayer2(); 
-			 pl.getChessmodel().learn(thisGame.getAllBoardmatrixes(), myGame.getPlayer1().areYouWhite(), myGame.resultWhiteHasWon());
 		 }
 	 }
 	 
@@ -358,91 +429,13 @@ public class GuiView extends View {
 		 statsdata[1][1] = Integer.toString(statsdataraw[1]);
 		 statsdata[1][2] = Integer.toString(statsdataraw[2]);
 		 int sum = Math.max(statsdataraw[0] + statsdataraw[1] + statsdataraw[2],1); //prevent div by 0
-		 statsdata[2][0] = Integer.toString(statsdataraw[0] / sum *100) + "%";
-		 statsdata[2][1] = Integer.toString(statsdataraw[1] / sum*100) + "%";
-		 statsdata[2][2] = Integer.toString(statsdataraw[2] / sum*100) + "%";
+		 statsdata[2][0] = Integer.toString(Math.round((float) statsdataraw[0] / sum *100)) + "%";
+		 statsdata[2][1] = Integer.toString(Math.round((float) statsdataraw[1] / sum*100)) + "%";
+		 statsdata[2][2] = Integer.toString(Math.round((float) statsdataraw[2] / sum*100)) + "%";
 		 statstable.repaint();
 	}
 	    
-	
-	public Player decidePlayer (int playerno) {
-		Player pl = null;
-		JComboBox<String> combo;
-		if (playerno==1) combo = p1comboBox;
-		else combo = p2comboBox;
-		
-		//Player 1 will always be white!
-		if (combo.getSelectedItem().toString().equals(Consts.humanPlayer)) pl =  new HumanPlayer(playerno==1,this,Consts.humanPlayer);
-			else pl =  new MachinePlayer(playerno==1,this,combo.getSelectedItem().toString(), models.get(combo.getSelectedItem().toString()));
-		
-		return pl;
-	}
 
-	public int decideRounds () {
-		return 1;
-		
-	}
-
-	public void drawStart(Board board, String name1, String name2) {
-		statusmessage.setText("Spiele "+name1 + " against "+ name2);
-		drawBoard(board);
-	}
-
-	public void drawMove (Move move, boolean amIWhite, int movenumber) {
-		if (outputMoves) {
-			String color = (amIWhite) ? "WEISS" : "SCHWARZ";
-			String thisline = "#"+movenumber+" "+color+": " +
-					Utils.whichFigure(move.getFiguretype()) + Utils.whichPlace(move.getStartpos()) +  " "
-					+  Utils.whichPlace(move.getTargetpos()) +  " ";
-			//Knocked somebody off?
-			if (move.knockedOff() != 0) thisline = thisline + "#"+Utils.whichFigure(move.knockedOff()) +  " ";
-			//Magic Bauer to Dame?
-			if (move.getFiguretype() != move.getBoard().whoIsOnField(move.getTargetpos()))
-				thisline = thisline + "->"+Utils.whichFigure(move.getBoard().whoIsOnField(move.getTargetpos())) +  " ";
-			//Checkmate or check?
-			if (move.isCheckForFoe(amIWhite)) thisline = thisline + "+";
-			gamelog.append(thisline+newline);
-		}
-		
-	}
-
-	//returns moveindex
-	public int getHumanInput (Board board, List<Move> possibleMoves, boolean forWhite) {
-		//repeat until thisGame.wasCancelled;
-		return 0;
-		
-	}
-
-	public void drawEnd(boolean isDraw, boolean hasWhiteWon, String winner, boolean hasMachineWonAgainstHuman) {
-		if (outputMoves) {
-			String thisline = "And the Winner is..."+newline;
-			if (isDraw) {
-				thisline = thisline + "Niemand, unentschieden.";
-			} else if (hasWhiteWon) {
-				thisline = thisline + "Weiss!"+newline;
-				thisline = thisline + "Congrats, "+winner+"!";
-			} else {
-				thisline = thisline + "Schwarz!"+newline;
-				thisline = thisline + "Congrats, "+winner+"!";
-			}
-			if (hasMachineWonAgainstHuman) thisline = thisline + newline + "HAHAHAHA! LOOOOOSER!";
-			gamelog.append(thisline+newline);
-		}
-		
-	}
-
-	public void drawStats(int whiteNo, String white, int blackNo, String black, int drawNo) {
-		
-	}
-
-	public void drawCancel() {
-		
-	}
-
-	public void drawGameNo(int game) {
-		
-	}
-	
 	public final JComponent getGui() {
         return gui;
     }

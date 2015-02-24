@@ -2,8 +2,9 @@ package board;
 import java.util.ArrayList;
 import java.util.List;
 
-import main.Consts;
+import javax.swing.SwingUtilities;
 
+import main.Consts;
 import players.Player;
 import views.*;
 
@@ -16,7 +17,8 @@ import views.*;
  * @author HellwigP
  *
  */
-public class Game {
+public class Game extends Thread {
+	private Board board;
 	private Player player1;
 	private Player player2;
 	private List<Board> allPositions = new ArrayList<Board>();
@@ -29,15 +31,17 @@ public class Game {
 	/**
 	 * 
 	 */
-	public Game(Player player1, Player player2, View view) {
+	public Game(Board board, Player player1, Player player2, View view) {
+		this.board=board;
 		this.player1 = player1;
 		this.player2 = player2;
 		this.gameView=view;
 	}
 	
 	//returns false if cancelled
-	public boolean play (Board board) {
-		gameView.drawStart(board,player1.getName(),player2.getName());
+	@Override
+	public void run() {
+		drawStart(board,player1.getName(),player2.getName());
 		player1.yourNewPosition(board);
 		player2.yourNewPosition(board);
 		Player isOn = null;
@@ -56,28 +60,54 @@ public class Game {
 				else countmoves++;
 				if (board == null) wasCancelled = true;
 				else {
-					isOn.showYourMove(movenumber);
+					drawMove(isOn.whatIsYourMove(),isOn.areYouWhite(),movenumber);
 				}
 			}
 		}
 		if (!wasCancelled) {
 			//Decide Winning
 			//1. DRAW
-			if (isDraw(board)) {
-				whoHasWon = 0; //DRAW
-				gameView.drawEnd(this.resultIsDraw(),this.resultWhiteHasWon(),"",false);	
-			}
-			else if (player1.areYouCheckmate()) {
-				whoHasWon = 2;
-				gameView.drawEnd(this.resultIsDraw(),this.resultWhiteHasWon(),player2.getName(),player2.areYouAMachine()&&!player1.areYouAMachine());
-			}
-			else if (player2.areYouCheckmate()) {
-				whoHasWon = 1;
-				gameView.drawEnd(this.resultIsDraw(),this.resultWhiteHasWon(),player1.getName(),player1.areYouAMachine()&&!player2.areYouAMachine());
-			}
+			if (isDraw(board)) whoHasWon = 0; //DRAW
+			else if (player1.areYouCheckmate()) whoHasWon = 2;
+			else if (player2.areYouCheckmate()) whoHasWon = 1;
+			drawEnd(this.resultIsDraw(),whoHasWon);	
 		} else gameView.drawCancel();
-		return !wasCancelled;
 	}
+	
+	//Output to View
+	protected void drawStart(final Board board, final String p1, final String p2) {
+		if (gameView.getSwing()) {
+			SwingUtilities.invokeLater(new Runnable() {
+	            @Override
+	            public void run() {
+	            	gameView.drawStart(board,p1,p2);
+	            }      
+	        });
+		} else gameView.drawStart(board,p1,p2);
+	}
+	
+	protected void drawMove(final Move move, final boolean areYouWhite, final int movenumber) {
+		if (gameView.getSwing()) {
+			SwingUtilities.invokeLater(new Runnable() {
+	            @Override
+	            public void run() {
+	            	gameView.drawMove(move,areYouWhite,movenumber);
+	            }      
+	        });
+		} else gameView.drawMove(move,areYouWhite,movenumber);
+	}
+	
+	protected void drawEnd(final boolean isDraw,final int whoHasWon) {
+		if (gameView.getSwing()) {
+			SwingUtilities.invokeLater(new Runnable() {
+	            @Override
+	            public void run() {
+	            	gameView.drawEnd(isDraw,whoHasWon);
+	            }      
+	        });
+		} else gameView.drawEnd(isDraw,whoHasWon);
+	}
+	
 	
 	private boolean isDraw(Board board) {
 		if ((!player1.canYouMove()) && (!player2.canYouMove())) return true;

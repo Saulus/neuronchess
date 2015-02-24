@@ -54,10 +54,6 @@ public abstract class Player {
 	//to be overwritten by Child-Class
 	public abstract Board makeYourMove();
 	
-	public void showYourMove(int movenumber) {
-		this.gameView.drawMove( myMoves.get(moveindex), amIWhite, movenumber);
-	}
-	
 	public boolean areYouWhite() {
 		return amIWhite;
 	}

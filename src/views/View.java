@@ -23,6 +23,7 @@ public abstract class View {
 	protected HashMap<String,Model> models = new HashMap<String,Model>();
 	protected Game thisGame = null;
 	protected String newline = System.getProperty("line.separator");
+	private boolean amISwing = false;
 
 	public View() {
 		//load models
@@ -52,11 +53,6 @@ public abstract class View {
 	}
 		
 	
-	// -1= wiederholen, 1=mensch, 2 =uniform, 3=logreg
-	public abstract Player decidePlayer (int playerno);
-
-	public abstract int decideRounds () ;
-
 	public abstract void drawStart(Board board, String name1, String name2);
 
 	public abstract void drawMove (Move move, boolean amIWhite, int movenumber) ;
@@ -64,16 +60,21 @@ public abstract class View {
 	//returns moveindex
 	public abstract int getHumanInput (Board board, List<Move> possibleMoves, boolean forWhite) ;
 
-	public abstract void drawEnd(boolean isDraw, boolean hasWhiteWon, String winner, boolean hasMachineWonAgainstHuman);
-
-	public abstract void drawStats(int whiteNo, String white, int blackNo, String black, int drawNo) ;
+	public abstract void drawEnd(boolean isDraw, int whohaswon);
 
 	public abstract void drawCancel() ;
 
-	public abstract void drawGameNo(int game) ;
 
 	public void setOutputMoves (boolean set) {
 		this.outputMoves=set;
+	}
+	
+	public void setSwing (boolean s) {
+		this.amISwing=s;
+	}
+	
+	public boolean getSwing () {
+		return amISwing;
 	}
 
 }
