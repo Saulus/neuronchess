@@ -31,6 +31,7 @@ public final class Consts {
 	
 	//Game Constants
 	public static final String humanPlayer = "mensch";
+	public static int wait4move = 350; //ms to wait for next move (if moves are drawn by gui)
 	
 	
 	//Some boardpositions

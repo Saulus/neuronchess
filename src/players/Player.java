@@ -2,8 +2,8 @@ package players;
 
 import java.util.List;
 
+import models.Model;
 import views.*;
-
 import board.Board;
 import board.Move;
 
@@ -26,6 +26,7 @@ public abstract class Player {
 	protected int moveindex = 0;
 	protected boolean amIAMachine;
 	protected String name;
+	protected Model chessmodel = null;
 	/**
 	 * 
 	 */
@@ -67,6 +68,10 @@ public abstract class Player {
 	
 	public Move whatIsYourMove() {
 		return myMoves.get(moveindex);
+	}
+	
+	public Model getChessmodel () {
+		return chessmodel;
 	}
 
 }

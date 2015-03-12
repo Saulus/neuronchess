@@ -13,7 +13,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
@@ -30,6 +30,7 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
@@ -37,14 +38,13 @@ import javax.swing.border.LineBorder;
 import players.HumanPlayer;
 import players.MachinePlayer;
 import players.Player;
-
 import main.Consts;
-
 import board.Board;
 import board.Game;
 import board.Move;
 import board.Position;
 import board.Utils;
+
 
 public class GuiView extends View {
 	
@@ -65,6 +65,9 @@ public class GuiView extends View {
     private JTextArea gamelog = new JTextArea(); 
     private static final String COLS = "ABCDEFGH";
     private int gamenumber = 0;
+	protected java.util.concurrent.ConcurrentHashMap<Integer,Game> myGames = new ConcurrentHashMap<Integer,Game>();
+	private Learner learner;
+	
 
 	public GuiView() {
 		  super();
@@ -105,7 +108,7 @@ public class GuiView extends View {
 	        p2comboBox.addActionListener(comboAction);
 	        tools.add(p2comboBox);
 	        tools.addSeparator();
-	        Action newGameAction = new AbstractAction("Starte neu") {
+	        Action newGameAction = new AbstractAction("Einzelspiel") {
 	            public void actionPerformed(ActionEvent e) {
 	            	startSingleGame();
 	            }
@@ -118,7 +121,7 @@ public class GuiView extends View {
 	            }
 	        };
 	        tools.add(learnAction);
-	        Action stopLearnAction = new AbstractAction("Stop Lernen") {
+	        Action stopLearnAction = new AbstractAction("Stop!") {
 	            public void actionPerformed(ActionEvent e) {
 	            	stopLearning();
 	            }
@@ -204,8 +207,8 @@ public class GuiView extends View {
 
 	        // create the chess board squares
 	        Insets buttonMargin = new Insets(0, 0, 0, 0);
-	        for (int ii = 0; ii < chessBoardSquares.length; ii++) {
-	            for (int jj = 0; jj < chessBoardSquares[ii].length; jj++) {
+	        for (int ii = 0; ii <  Consts.horizontalBoardsize; ii++) {
+	            for (int jj = 0; jj < Consts.verticalBoardsize; jj++) {
 	                JButton b = new JButton();
 	                b.setMargin(buttonMargin);
 	                // our chess pieces are 64x64 px in size, so we'll
@@ -235,11 +238,11 @@ public class GuiView extends View {
 	                    SwingConstants.CENTER));
 	        }
 	        // fill the black non-pawn piece row
-	        for (int ii = 0; ii < Consts.horizontalBoardsize; ii++) {
-	            for (int jj = 0; jj < Consts.verticalBoardsize; jj++) {
-	                switch (jj) {
-	                    case 7:
-	                        chessBoard.add(new JLabel("" + (9-(ii + 1)),
+	        for (int jj = Consts.verticalBoardsize-1; jj >=0; jj--) {
+	            for (int ii = 0; ii < Consts.horizontalBoardsize; ii++) {
+	                switch (ii) {
+	                    case 0:
+	                        chessBoard.add(new JLabel("" + (jj + 1),
 	                                SwingConstants.CENTER));
 	                    default:
 	                        chessBoard.add(chessBoardSquares[ii][jj]);
@@ -252,6 +255,7 @@ public class GuiView extends View {
 	 private final void createImages() {
 		 try {
 			 //image sorting order QUEEN = 0, KING = 1, ROOK = 2, KNIGHT = 3, BISHOP = 4, PAWN = 5;
+			 //ii = 0 -> Black 
 			 BufferedImage bi = ImageIO.read(new File("memI0.png"));
 			 for (int ii = 0; ii < 2; ii++) {
 				 chessPieceImages[ii][Consts.bauerNumber-1] = bi.getSubimage(5 * 64, ii * 64, 64, 64);
@@ -270,6 +274,7 @@ public class GuiView extends View {
 	 /***************** Action Buttons *************************/
 	 
 	 private void setPlayer() {
+		 cancel();
 		 //reset gamenumber and stats
 		 statsdataraw[0]=0;
 		 statsdataraw[1]=0;
@@ -285,25 +290,58 @@ public class GuiView extends View {
 		 gamenumber++;
 		 gamelog.append("Spiel #"+gamenumber+newline);
 		 //cancel old game;
-		 if (thisGame != null) thisGame.cancel();
+		 cancel();
 		 Player player1 = decidePlayer(1);
 		 Player player2 = decidePlayer(2);
-		 doNewGame(player1,player2);
+		 doNewGame(gamenumber,player1,player2);
 	 }
 	 
 	 private void startLearning() {
-		 
+		 setOutputMoves(false);
+		//refresh gamelog
+		 gamelog.setText("");
+		 //cancel old game;
+		 cancel();
+		 statusmessage.setText("Lerne "+p1comboBox.getSelectedItem().toString() + " gegen "+ p2comboBox.getSelectedItem().toString());
+		 learner = new Learner();
+		 learner.start();
 	 }
 	 
+	 class Learner extends Thread {
+			int processors;	
+			public Learner () {
+				processors = Runtime.getRuntime().availableProcessors();
+			}
+			@Override
+			public void run() {
+				while (!isInterrupted()) {
+					if (myGames.size()< (processors-1)) {
+						gamenumber++;
+						SwingUtilities.invokeLater(new Runnable() {
+				            @Override
+				            public void run() {
+				            	gamelog.setText("Spiel #"+gamenumber+newline);
+				            }      
+				        });
+						Player p1 = decidePlayer(1);
+					    Player p2 = decidePlayer(2);
+						doNewGame(gamenumber,p1,p2);
+					}
+				}
+			}
+		}
+	 
 	 private void stopLearning() {
-		 
+		 cancel();
 	 }
 	 
 	 /***************** View Interface methods *************************/
 	 
 	 public void drawStart(Board board, String name1, String name2) {
+		 if (outputMoves) {
 			statusmessage.setText("Spiele "+name1 + " against "+ name2);
 			drawBoard(board);
+		 }
 		}
 
 		public void drawMove (Move move, boolean amIWhite, int movenumber) {
@@ -320,12 +358,13 @@ public class GuiView extends View {
 				//Checkmate or check?
 				if (move.isCheckForFoe(amIWhite)) thisline = thisline + "+";
 				gamelog.append(thisline+newline);
+				//delete from old position & movbe to new
+				//Problem: Sonderzüge, z.B. Rochade, Bauer->Dame, en passant
+				// --> einfach: Male Board neu
+				//Icon icon = chessBoardSquares[move.getStartpos().h][move.getStartpos().v].getIcon();
+				//chessBoardSquares[move.getStartpos().h][move.getStartpos().v].setIcon(new ImageIcon(new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB)));
+				//chessBoardSquares[move.getTargetpos().h][move.getTargetpos().v].setIcon(icon); 
 				drawBoard(move.getBoard());
-				try {
-				    Thread.sleep(2000);                 //1000 milliseconds is one second.
-				} catch(InterruptedException ex) {
-				    Thread.currentThread().interrupt();
-				}
 			}
 		}
 
@@ -336,42 +375,41 @@ public class GuiView extends View {
 			
 		}
 
-		public void drawEnd(boolean isDraw, int whoHasWon) {
+		public void drawEnd(int gamenumber, boolean isDraw, int whoHasWon, boolean isWinnerWhite, String winnerName) {
 			if (outputMoves) {
-				String thisline = "And the Winner is..."+newline;
+				String thisline = "Gewinner des Spiels #"+ gamenumber +" ist..."+newline;
 				if (isDraw) {
 					thisline = thisline + "Niemand, unentschieden.";
-				} else if (whoHasWon==1) {
-					String weiss = (thisGame.getPlayer1().areYouWhite()) ? "Weiss" : "Schwarz";
-					thisline = thisline + weiss+newline;
-					thisline = thisline + "Congrats, "+thisGame.getPlayer1().getName()+"!";
 				} else {
-					String weiss = (thisGame.getPlayer2().areYouWhite()) ? "Weiss" : "Schwarz";
+					String weiss = (isWinnerWhite) ? "Weiss" : "Schwarz";
 					thisline = thisline + weiss+newline;
-					thisline = thisline + "Congrats, "+thisGame.getPlayer2().getName()+"!";
+					thisline = thisline + "Glückwunsch, "+winnerName+"!";
 				}
 				gamelog.append(thisline+newline);
 			}
 			if (!isDraw) {
-				learn(thisGame);
 				addStatsPlayer(whoHasWon);
 			} else addStatsDraw();
 			drawStats();
+			myGames.remove(gamenumber); //de-register game, as it has ended
 		}
 
-		public void drawCancel() {
-			
+		public void drawCancel(int gamenumber) {
+			String thisline = "Spiel #"+ gamenumber +" abgebrochen :-(";
+			gamelog.append(thisline+newline);
 		}
 	 
 		
 	 /***************** Helpers *************************/
 	 
-	 private void doNewGame(Player p1, Player p2) {
+	 private void doNewGame(int gamenumber, Player p1, Player p2) {
 		//START GAME
 		Board board = new Board(Utils.buildBoardmatrix(Consts.startBoard));//Consts.testBoard3
-		thisGame = new Game(board,p1,p2,(View)this);
+		Game thisGame = new Game(gamenumber,board,p1,p2,(View)this);
 		thisGame.start();
+		myGames.put(gamenumber, thisGame); //register game
 	 }
+
 	 
 	 public Player decidePlayer (int playerno) {
 			Player pl = null;
@@ -386,30 +424,24 @@ public class GuiView extends View {
 			return pl;
 		}
 	 
-	 
-	 private void learn(Game myGame) {
-		//LEARN MODEL that has played
-		 MachinePlayer pl;
-		 if (myGame.getPlayer1().areYouAMachine()) {
-			 pl = (MachinePlayer)myGame.getPlayer1(); 
-			 pl.getChessmodel().learn(myGame.getAllBoardmatrixes(), myGame.getPlayer1().areYouWhite(), myGame.resultWhiteHasWon());
-		 }
-		 if (myGame.getPlayer2().areYouAMachine() && !myGame.getPlayer2().getName().equals(myGame.getPlayer1().getName())) {
-			 pl = (MachinePlayer)myGame.getPlayer2(); 
-			 pl.getChessmodel().learn(myGame.getAllBoardmatrixes(), myGame.getPlayer1().areYouWhite(), myGame.resultWhiteHasWon());
-		 }
-	 }
-	 
 	 private void drawBoard(Board board) {
 		 // set up the black pieces
 		 for (byte i = 0; i < Consts.horizontalBoardsize; i++) {
 			 for (byte j = 0; j < Consts.verticalBoardsize; j++) {
 				 Position pos = new Position(i,j);
 				 if (board.isFieldBlockedByOwn(true, pos))
-					 chessBoardSquares[i][j].setIcon(new ImageIcon(chessPieceImages[0][Math.abs(board.whoIsOnField(pos))-1]));
-				 else if (board.isFieldBlockedByOwn(false, pos))
 					 chessBoardSquares[i][j].setIcon(new ImageIcon(chessPieceImages[1][Math.abs(board.whoIsOnField(pos))-1]));
+				 else if (board.isFieldBlockedByOwn(false, pos))
+					 chessBoardSquares[i][j].setIcon(new ImageIcon(chessPieceImages[0][Math.abs(board.whoIsOnField(pos))-1]));
 				 else chessBoardSquares[i][j].setIcon(new ImageIcon(new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB)));
+			 }
+		 }
+	 }
+	 
+	 private void clearBoard() {
+		 for (byte i = 0; i < Consts.horizontalBoardsize; i++) {
+			 for (byte j = 0; j < Consts.verticalBoardsize; j++) {
+				 chessBoardSquares[i][j].setIcon(new ImageIcon(new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB)));
 			 }
 		 }
 	 }
@@ -439,5 +471,18 @@ public class GuiView extends View {
 	public final JComponent getGui() {
         return gui;
     }
+	
+	private void cancel () {
+		if (learner != null) {
+			learner.interrupt();
+			learner = null;
+		}
+		for (int ig : myGames.keySet()) {
+			myGames.get(ig).interrupt();
+			myGames.remove(ig);
+		}
+		statusmessage.setText("Cancelled");
+		clearBoard();
+	}
 
 }

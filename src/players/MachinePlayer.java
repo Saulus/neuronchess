@@ -3,9 +3,7 @@ package players;
 import java.util.Arrays;
 
 import views.*;
-
 import board.Board;
-
 import main.Consts;
 import models.*;
 
@@ -37,7 +35,6 @@ final class Pair implements Comparable<Pair> {
  *
  */
 public class MachinePlayer extends Player {
-	private Model chessmodel;
 
 	/**
 	 * @param amIWhite
@@ -71,10 +68,6 @@ public class MachinePlayer extends Player {
 			else if (probs.length>2 && randomfloat >= Consts.firstChoise + Consts.secondChoise) moveindex = probs[2].index;
 			return myMoves.get(moveindex).getBoard();
 		} else return null;
-	}
-	
-	public Model getChessmodel () {
-		return chessmodel;
 	}
 
 

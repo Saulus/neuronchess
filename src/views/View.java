@@ -2,17 +2,14 @@ package views;
 
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import players.Player;
 
 import main.Consts;
 import models.LogRegModel;
 import models.Model;
 import models.UniformModel;
-
-
 import board.Board;
 import board.Game;
 import board.Move;
@@ -21,7 +18,6 @@ public abstract class View {
 	
 	protected boolean outputMoves = true; //output moves at all? (e.g. if learning)
 	protected HashMap<String,Model> models = new HashMap<String,Model>();
-	protected Game thisGame = null;
 	protected String newline = System.getProperty("line.separator");
 	private boolean amISwing = false;
 
@@ -60,11 +56,15 @@ public abstract class View {
 	//returns moveindex
 	public abstract int getHumanInput (Board board, List<Move> possibleMoves, boolean forWhite) ;
 
-	public abstract void drawEnd(boolean isDraw, int whohaswon);
+	public abstract void drawEnd(int gamenumber, boolean isDraw, int whoHasWon, boolean isWinnerWhite, String winnerName);
 
-	public abstract void drawCancel() ;
+	public abstract void drawCancel(int gamenumber) ;
 
 
+	public boolean getOutputMoves () {
+		return outputMoves;
+	}
+	
 	public void setOutputMoves (boolean set) {
 		this.outputMoves=set;
 	}

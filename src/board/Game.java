@@ -1,10 +1,13 @@
 package board;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.swing.SwingUtilities;
 
 import main.Consts;
+import players.MachinePlayer;
 import players.Player;
 import views.*;
 
@@ -18,20 +21,24 @@ import views.*;
  *
  */
 public class Game extends Thread {
+	private int myNumber;
 	private Board board;
 	private Player player1;
 	private Player player2;
 	private List<Board> allPositions = new ArrayList<Board>();
 	private int whoHasWon; //1=Player1, 2=Player2, 0=Draw
-	private boolean wasCancelled = false;
 	private View gameView;
 	private int movenumber =0;
 	private int countmoves = 0; //for fifty move rule (w/o pawn or capture)
+	
+	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+	private final Lock writeLock = lock.writeLock();
 
 	/**
 	 * 
 	 */
-	public Game(Board board, Player player1, Player player2, View view) {
+	public Game(int myNumber, Board board, Player player1, Player player2, View view) {
+		this.myNumber=myNumber;
 		this.board=board;
 		this.player1 = player1;
 		this.player2 = player2;
@@ -45,11 +52,18 @@ public class Game extends Thread {
 		player1.yourNewPosition(board);
 		player2.yourNewPosition(board);
 		Player isOn = null;
-		while (	!wasCancelled &&
+		while (	!isInterrupted() &&
 				!isDraw(board) &&
 				!player1.areYouCheckmate() &&
 				!player2.areYouCheckmate())
 		{
+			//Verzögerung
+			if (gameView.getOutputMoves()) try {
+				Thread.sleep(Consts.wait4move);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				interrupt();
+			}
 			this.allPositions.add(board);
 			if (isOn == player1) isOn=player2; else isOn=player1;
 			if (isOn == player1) movenumber++;
@@ -58,20 +72,30 @@ public class Game extends Thread {
 				board = isOn.makeYourMove();
 				if (isOn.whatIsYourMove().getFiguretype() == Consts.bauerNumber || isOn.whatIsYourMove().knockedOff() != 0) countmoves = 0;
 				else countmoves++;
-				if (board == null) wasCancelled = true;
+				if (board == null) this.interrupt();
 				else {
-					drawMove(isOn.whatIsYourMove(),isOn.areYouWhite(),movenumber);
+					if (!isInterrupted()) drawMove(isOn.whatIsYourMove(),isOn.areYouWhite(),movenumber);
 				}
 			}
 		}
-		if (!wasCancelled) {
-			//Decide Winning
+		if (!isInterrupted()) {
+			//Decide Winning and learn
 			//1. DRAW
-			if (isDraw(board)) whoHasWon = 0; //DRAW
-			else if (player1.areYouCheckmate()) whoHasWon = 2;
-			else if (player2.areYouCheckmate()) whoHasWon = 1;
-			drawEnd(this.resultIsDraw(),whoHasWon);	
-		} else gameView.drawCancel();
+			if (isDraw(board)) {
+				whoHasWon = 0; //DRAW
+				drawEnd();
+			}
+			else if (player1.areYouCheckmate()) {
+				whoHasWon = 2;
+				drawEnd();
+				if (player2.areYouAMachine()) learn(player2);
+			}
+			else if (player2.areYouCheckmate()) {
+				whoHasWon = 1;
+				drawEnd();
+				if (player1.areYouAMachine()) learn(player1);
+			}
+		} else drawCancel();
 	}
 	
 	//Output to View
@@ -97,15 +121,26 @@ public class Game extends Thread {
 		} else gameView.drawMove(move,areYouWhite,movenumber);
 	}
 	
-	protected void drawEnd(final boolean isDraw,final int whoHasWon) {
+	protected void drawEnd() {
 		if (gameView.getSwing()) {
 			SwingUtilities.invokeLater(new Runnable() {
 	            @Override
 	            public void run() {
-	            	gameView.drawEnd(isDraw,whoHasWon);
+	            	gameView.drawEnd(myNumber,resultIsDraw(), whoHasWon(), resultWhiteHasWon(), winnerName());
 	            }      
 	        });
-		} else gameView.drawEnd(isDraw,whoHasWon);
+		} else gameView.drawEnd(myNumber,resultIsDraw(), whoHasWon(), resultWhiteHasWon(), winnerName());
+	}
+	
+	protected void drawCancel() {
+		if (gameView.getSwing()) {
+			SwingUtilities.invokeLater(new Runnable() {
+	            @Override
+	            public void run() {
+	            	gameView.drawCancel(myNumber);
+	            }      
+	        });
+		} else gameView.drawCancel(myNumber);
 	}
 	
 	
@@ -137,6 +172,12 @@ public class Game extends Thread {
 		return false;
 	}
 	
+	public String winnerName () {
+		if (whoHasWon==1) return player1.getName();
+		else if (whoHasWon==2) return player2.getName();
+		return "";
+	}
+	
 	public boolean resultIsDraw () {
 		return whoHasWon == 0;
 	}
@@ -153,20 +194,19 @@ public class Game extends Thread {
 		return allMatrixes;
 	}
 	
-	public void cancel () {
-		wasCancelled = true;
-	}
-	
-	public boolean wasCancelled () {
-		return wasCancelled;
-	}
-	
 	public Player getPlayer1 () {
 		return player1;
 	}
 	
 	public Player getPlayer2 () {
 		return player2;
+	}
+	
+	private void learn (Player pl) {
+		
+			 pl.getChessmodel().learn(getAllBoardmatrixes(), pl.areYouWhite(), resultWhiteHasWon());
+		  
+
 	}
 	
 
