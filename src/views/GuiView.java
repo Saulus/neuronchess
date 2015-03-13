@@ -13,7 +13,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
@@ -30,7 +29,6 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
@@ -40,7 +38,6 @@ import players.MachinePlayer;
 import players.Player;
 import main.Consts;
 import board.Board;
-import board.Game;
 import board.Move;
 import board.Position;
 import board.Utils;
@@ -60,13 +57,9 @@ public class GuiView extends View {
     		{"0","0","0"},
         	{"0%","0%","0%"}
         };
-    private final int[] statsdataraw = {0,0,0}; //player 1, p2, daw
     private JTable statstable;
     private JTextArea gamelog = new JTextArea(); 
     private static final String COLS = "ABCDEFGH";
-    private int gamenumber = 0;
-	protected java.util.concurrent.ConcurrentHashMap<Integer,Game> myGames = new ConcurrentHashMap<Integer,Game>();
-	private Learner learner;
 	
 
 	public GuiView() {
@@ -87,10 +80,8 @@ public class GuiView extends View {
 	        JToolBar tools = new JToolBar();
 	        tools.setFloatable(false);
 	        gui.add(tools, BorderLayout.PAGE_START);
-	        ArrayList<String> choices = new ArrayList<String>();
-	        choices.add(Consts.humanPlayer);
-	        choices.addAll(models.keySet());
-	        String[] choicesarr= choices.toArray(new String[choices.size()]);
+	        ArrayList<String> choices = getPlayerChoices();
+	        String[] choicesarr= getPlayerChoices().toArray(new String[choices.size()]);
 	        p1comboBox = new JComboBox<>(choicesarr);
 	        Action comboAction = new AbstractAction("Player1") {
 	            public void actionPerformed(ActionEvent e) {
@@ -130,13 +121,13 @@ public class GuiView extends View {
 	        tools.addSeparator();
 	        Action saveModelAction = new AbstractAction("Modelle speichern") {
 	            public void actionPerformed(ActionEvent e) {
-	            	saveModels();
+	            	acSaveModels();
 	            }
 	        };
 	        tools.add(saveModelAction);
 	        Action restoreModelAction = new AbstractAction("Modelle wiederherstellen") {
 	            public void actionPerformed(ActionEvent e) {
-	            	loadModels();
+	            	acLoadModels();
 	            }
 	        };
 	        tools.add(restoreModelAction);
@@ -273,69 +264,33 @@ public class GuiView extends View {
 	 
 	 /***************** Action Buttons *************************/
 	 
-	 private void setPlayer() {
-		 cancel();
-		 //reset gamenumber and stats
-		 statsdataraw[0]=0;
-		 statsdataraw[1]=0;
-		 statsdataraw[2]=0;
-		 gamenumber=0;
-		 drawStats();
+	 protected void setPlayer() {
+		super.setPlayer();
+		drawStats();
 	 }
 	 
-	 private void startSingleGame() {
-		 setOutputMoves(true);
-		 //refresh gamelog
-		 gamelog.setText("");
-		 gamenumber++;
-		 gamelog.append("Spiel #"+gamenumber+newline);
-		 //cancel old game;
-		 cancel();
-		 Player player1 = decidePlayer(1);
-		 Player player2 = decidePlayer(2);
-		 doNewGame(gamenumber,player1,player2);
-	 }
-	 
-	 private void startLearning() {
-		 setOutputMoves(false);
-		//refresh gamelog
-		 gamelog.setText("");
-		 //cancel old game;
-		 cancel();
+	 protected void startLearning() {
+		//some output
 		 statusmessage.setText("Lerne "+p1comboBox.getSelectedItem().toString() + " gegen "+ p2comboBox.getSelectedItem().toString());
-		 learner = new Learner();
-		 learner.start();
+		 gamelog.setText("");
+		 super.startLearning();
 	 }
-	 
-	 class Learner extends Thread {
-			int processors;	
-			public Learner () {
-				processors = Runtime.getRuntime().availableProcessors();
-			}
-			@Override
-			public void run() {
-				while (!isInterrupted()) {
-					if (myGames.size()< (processors-1)) {
-						gamenumber++;
-						SwingUtilities.invokeLater(new Runnable() {
-				            @Override
-				            public void run() {
-				            	gamelog.setText("Spiel #"+gamenumber+newline);
-				            }      
-				        });
-						Player p1 = decidePlayer(1);
-					    Player p2 = decidePlayer(2);
-						doNewGame(gamenumber,p1,p2);
-					}
-				}
-			}
-		}
 	 
 	 private void stopLearning() {
 		 cancel();
 	 }
 	 
-	 /***************** View Interface methods *************************/
+	 protected void acLoadModels() {
+		 cancel();
+		 statusmessage.setText(loadModels());
+	 }
+	 
+	 protected void acSaveModels() {
+		 cancel();
+		 statusmessage.setText(saveModels());
+	 }
+	 
+	 /***************** View Interface 4 Game methods *************************/
 	 
 	 public void drawStart(Board board, String name1, String name2) {
 		 if (outputMoves) {
@@ -401,27 +356,22 @@ public class GuiView extends View {
 	 
 		
 	 /***************** Helpers *************************/
-	 
-	 private void doNewGame(int gamenumber, Player p1, Player p2) {
-		//START GAME
-		Board board = new Board(Utils.buildBoardmatrix(Consts.startBoard));//Consts.testBoard3
-		Game thisGame = new Game(gamenumber,board,p1,p2,(View)this);
-		thisGame.start();
-		myGames.put(gamenumber, thisGame); //register game
-	 }
-
-	 
-	 public Player decidePlayer (int playerno) {
+		
+		protected Player decidePlayer (int playerno) {
 			Player pl = null;
 			JComboBox<String> combo;
 			if (playerno==1) combo = p1comboBox;
 			else combo = p2comboBox;
-			
+
 			//Player 1 will always be white!
 			if (combo.getSelectedItem().toString().equals(Consts.humanPlayer)) pl =  new HumanPlayer(playerno==1,this,Consts.humanPlayer);
-				else pl =  new MachinePlayer(playerno==1,this,combo.getSelectedItem().toString(), models.get(combo.getSelectedItem().toString()));
-			
+			else pl =  new MachinePlayer(playerno==1,this,combo.getSelectedItem().toString(), models.get(combo.getSelectedItem().toString()));
+
 			return pl;
+		}
+
+		protected void drawNewGameNumber (int number) {
+			gamelog.setText("Spiel #"+number+newline);
 		}
 	 
 	 private void drawBoard(Board board) {
@@ -446,14 +396,6 @@ public class GuiView extends View {
 		 }
 	 }
 	 
-	 private void addStatsDraw() {
-		 statsdataraw[2]++;
-	 }
-	 
-	 private void addStatsPlayer(int player) {
-		 statsdataraw[player-1]++;
-	 }
-	 
 	 private void drawStats() {
 		 statsdata[0][0] = p1comboBox.getSelectedItem().toString();
 		 statsdata[0][1] = p2comboBox.getSelectedItem().toString();
@@ -472,15 +414,8 @@ public class GuiView extends View {
         return gui;
     }
 	
-	private void cancel () {
-		if (learner != null) {
-			learner.interrupt();
-			learner = null;
-		}
-		for (int ig : myGames.keySet()) {
-			myGames.get(ig).interrupt();
-			myGames.remove(ig);
-		}
+	protected void cancel () {
+		super.cancel();
 		statusmessage.setText("Cancelled");
 		clearBoard();
 	}

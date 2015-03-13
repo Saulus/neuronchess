@@ -1,13 +1,10 @@
 package board;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.swing.SwingUtilities;
 
 import main.Consts;
-import players.MachinePlayer;
 import players.Player;
 import views.*;
 
@@ -30,9 +27,6 @@ public class Game extends Thread {
 	private View gameView;
 	private int movenumber =0;
 	private int countmoves = 0; //for fifty move rule (w/o pawn or capture)
-	
-	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-	private final Lock writeLock = lock.writeLock();
 
 	/**
 	 * 
@@ -70,12 +64,12 @@ public class Game extends Thread {
 			isOn.yourNewPosition(board);
 			if (isOn.canYouMove()) {
 				board = isOn.makeYourMove();
-				if (isOn.whatIsYourMove().getFiguretype() == Consts.bauerNumber || isOn.whatIsYourMove().knockedOff() != 0) countmoves = 0;
-				else countmoves++;
 				if (board == null) this.interrupt();
 				else {
-					if (!isInterrupted()) drawMove(isOn.whatIsYourMove(),isOn.areYouWhite(),movenumber);
+					if (isOn.whatIsYourMove().getFiguretype() == Consts.bauerNumber || isOn.whatIsYourMove().knockedOff() != 0) countmoves = 0;
+					else countmoves++;
 				}
+				if (!isInterrupted()) drawMove(isOn.whatIsYourMove(),isOn.areYouWhite(),movenumber);
 			}
 		}
 		if (!isInterrupted()) {
