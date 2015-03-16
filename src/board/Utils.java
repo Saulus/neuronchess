@@ -100,6 +100,10 @@ public final class Utils {
 		figurepos = new Position(horizontal,vertical);
 		return figurepos;
 	}
+	
+	public final static String whichStringPosition(Position pos) {
+		return Consts.horizontalPositions[pos.h] + Consts.verticalPositions[pos.v];
+	}
 		
 
 }

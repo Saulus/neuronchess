@@ -23,6 +23,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -60,6 +61,11 @@ public class GuiView extends View {
     private JTable statstable;
     private JTextArea gamelog = new JTextArea(); 
     private static final String COLS = "ABCDEFGH";
+    
+    private boolean humanMoveAwaitingWhite = false;
+    private boolean humanMoveAwaitingBlack = false;
+    private Position humanMoveStart=null;
+    private Position humanMoveTarget=null;
 	
 
 	public GuiView() {
@@ -197,11 +203,20 @@ public class GuiView extends View {
 	        gui.add(boardConstrain);
 
 	        // create the chess board squares
+	        //first: the board action
+	        Action chessboardaction = new AbstractAction() {
+	            public void actionPerformed(ActionEvent e) {
+	            	setHumanMove(((JButton) e.getSource()).getToolTipText());
+	            }
+	        };
 	        Insets buttonMargin = new Insets(0, 0, 0, 0);
-	        for (int ii = 0; ii <  Consts.horizontalBoardsize; ii++) {
-	            for (int jj = 0; jj < Consts.verticalBoardsize; jj++) {
+	        for (byte ii = 0; ii <  Consts.horizontalBoardsize; ii++) {
+	            for (byte jj = 0; jj < Consts.verticalBoardsize; jj++) {
 	                JButton b = new JButton();
 	                b.setMargin(buttonMargin);
+	                Position pos = new Position(ii,jj);
+	                b.setToolTipText(Utils.whichStringPosition(pos));
+	                b.addActionListener(chessboardaction);
 	                // our chess pieces are 64x64 px in size, so we'll
 	                // 'fill this in' using a transparent icon..
 	                ImageIcon icon = new ImageIcon(
@@ -271,9 +286,13 @@ public class GuiView extends View {
 	 
 	 protected void startLearning() {
 		//some output
-		 statusmessage.setText("Lerne "+p1comboBox.getSelectedItem().toString() + " gegen "+ p2comboBox.getSelectedItem().toString());
-		 gamelog.setText("");
-		 super.startLearning();
+		 if (p1comboBox.getSelectedItem().toString().equals(Consts.humanPlayer) || p2comboBox.getSelectedItem().toString().equals(Consts.humanPlayer))
+			 JOptionPane.showMessageDialog(null, "Lernmodus mit "+Consts.humanPlayer+" nicht möglich!");
+		 else {
+			 statusmessage.setText("Lerne "+p1comboBox.getSelectedItem().toString() + " gegen "+ p2comboBox.getSelectedItem().toString());
+			 gamelog.setText("");
+			 super.startLearning();
+		 }
 	 }
 	 
 	 private void stopLearning() {
@@ -282,12 +301,38 @@ public class GuiView extends View {
 	 
 	 protected void acLoadModels() {
 		 cancel();
-		 statusmessage.setText(loadModels());
+		 String mymessage = loadModels();
+		 JOptionPane.showMessageDialog(null, mymessage);
 	 }
 	 
 	 protected void acSaveModels() {
 		 cancel();
-		 statusmessage.setText(saveModels());
+		 String mymessage = saveModels();
+		 JOptionPane.showMessageDialog(null, mymessage);
+	 }
+	 
+	 //sets the human move; tests only for correctness regarding the tooltip of selected button
+	 private void setHumanMove(String strpos) {
+		 if (humanMoveAwaitingWhite || humanMoveAwaitingBlack) {
+			 strpos.toLowerCase();
+			 if (humanMoveStart == null && strpos.length() == 4) { //needs start choice
+				 if (strpos.substring(0,1).equals("w") && humanMoveAwaitingWhite) 
+					 humanMoveStart = Utils.whichPosition(strpos.substring(2,4)); 
+				 else
+				 if (strpos.substring(0,1).equals("s") && humanMoveAwaitingBlack)
+						 humanMoveStart = Utils.whichPosition(strpos.substring(2,4)); 
+			 } else
+			 if (humanMoveTarget == null) {
+				if (strpos.length() == 4) {
+					if (strpos.substring(0,1).equals("w") && humanMoveAwaitingBlack) 
+						humanMoveTarget = Utils.whichPosition(strpos.substring(2,4)); 
+					 else
+					 if (strpos.substring(0,1).equals("s") && humanMoveAwaitingWhite)
+						 humanMoveTarget = Utils.whichPosition(strpos.substring(2,4)); 
+				}
+				else  humanMoveTarget = Utils.whichPosition(strpos.substring(0,2)); 
+			 }
+		 }
 	 }
 	 
 	 /***************** View Interface 4 Game methods *************************/
@@ -313,21 +358,43 @@ public class GuiView extends View {
 				//Checkmate or check?
 				if (move.isCheckForFoe(amIWhite)) thisline = thisline + "+";
 				gamelog.append(thisline+newline);
-				//delete from old position & movbe to new
+				//delete from old position & move to new
 				//Problem: Sonderzüge, z.B. Rochade, Bauer->Dame, en passant
 				// --> einfach: Male Board neu
 				//Icon icon = chessBoardSquares[move.getStartpos().h][move.getStartpos().v].getIcon();
 				//chessBoardSquares[move.getStartpos().h][move.getStartpos().v].setIcon(new ImageIcon(new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB)));
 				//chessBoardSquares[move.getTargetpos().h][move.getTargetpos().v].setIcon(icon); 
-				drawBoard(move.getBoard());
+				drawBoard(move.getBoard()); //this is the simple re-paint ... TODO: make move better visible
 			}
 		}
 
 		//returns moveindex
 		public int getHumanInput (Board board, List<Move> possibleMoves, boolean forWhite) {
-			//repeat until thisGame.wasCancelled;
-			return 0;
-			
+			int ret=0;
+			boolean correct = false;
+			do {
+				if (forWhite) humanMoveAwaitingWhite=true; else humanMoveAwaitingBlack = true;
+				while (humanMoveStart == null || humanMoveTarget == null) {
+					//wait for input to happen
+				}
+				humanMoveAwaitingWhite=false;
+				humanMoveAwaitingBlack = false;
+				byte figuretype = board.whoIsOnField(humanMoveStart);
+				//test if Move is correct
+				 for (int i=0; i<possibleMoves.size(); i++) {
+						if (possibleMoves.get(i).getFiguretype() == figuretype &&
+							//either both positions are correct
+							possibleMoves.get(i).getStartpos().equals(humanMoveStart) &&
+							possibleMoves.get(i).getTargetpos().equals(humanMoveTarget)) {
+							ret=i;
+							correct=true;
+							break;
+						}
+				 }
+				humanMoveStart = null;
+				humanMoveTarget = null;
+			} while (!correct);
+			return ret;
 		}
 
 		public void drawEnd(int gamenumber, boolean isDraw, int whoHasWon, boolean isWinnerWhite, String winnerName) {
@@ -374,16 +441,25 @@ public class GuiView extends View {
 			gamelog.setText("Spiel #"+number+newline);
 		}
 	 
+		//draws board and adds correct tooltips per square (e.g. BA4)
 	 private void drawBoard(Board board) {
 		 // set up the black pieces
 		 for (byte i = 0; i < Consts.horizontalBoardsize; i++) {
 			 for (byte j = 0; j < Consts.verticalBoardsize; j++) {
 				 Position pos = new Position(i,j);
-				 if (board.isFieldBlockedByOwn(true, pos))
-					 chessBoardSquares[i][j].setIcon(new ImageIcon(chessPieceImages[1][Math.abs(board.whoIsOnField(pos))-1]));
-				 else if (board.isFieldBlockedByOwn(false, pos))
-					 chessBoardSquares[i][j].setIcon(new ImageIcon(chessPieceImages[0][Math.abs(board.whoIsOnField(pos))-1]));
-				 else chessBoardSquares[i][j].setIcon(new ImageIcon(new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB)));
+				 byte whoIs = board.whoIsOnField(pos);
+				 if (board.isFieldBlockedByOwn(true, pos)) {
+					 chessBoardSquares[i][j].setIcon(new ImageIcon(chessPieceImages[1][Math.abs(whoIs)-1]));
+					 chessBoardSquares[i][j].setToolTipText("w"+Utils.whichFigure(whoIs)+Utils.whichStringPosition(pos));
+				 }
+				 else if (board.isFieldBlockedByOwn(false, pos)) {
+					 chessBoardSquares[i][j].setIcon(new ImageIcon(chessPieceImages[0][Math.abs(whoIs)-1]));
+					 chessBoardSquares[i][j].setToolTipText("s"+Utils.whichFigure(whoIs)+Utils.whichStringPosition(pos)); 
+				 }
+				 else {
+					 chessBoardSquares[i][j].setIcon(new ImageIcon(new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB)));
+					 chessBoardSquares[i][j].setToolTipText(Utils.whichStringPosition(pos));
+				 }
 			 }
 		 }
 	 }
