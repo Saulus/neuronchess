@@ -2,9 +2,7 @@ package players;
 import main.Consts;
 import views.View;
 import board.Board;
-import board.Game;
 import board.Position;
-import board.Utils;
 
 /**
  * 
