@@ -51,11 +51,10 @@ public class Game extends Thread {
 				!player1.areYouCheckmate() &&
 				!player2.areYouCheckmate())
 		{
-			//Verzögerung
+			//Verzögerung wenn moves ausgegeben werden sollen
 			if (gameView.getOutputMoves()) try {
-				Thread.sleep(Consts.wait4move);
+				Thread.sleep(Consts.wait2draw);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				interrupt();
 			}
 			this.allPositions.add(board);

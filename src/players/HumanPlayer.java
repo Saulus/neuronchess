@@ -1,6 +1,10 @@
 package players;
+import main.Consts;
 import views.View;
 import board.Board;
+import board.Game;
+import board.Position;
+import board.Utils;
 
 /**
  * 
@@ -26,9 +30,24 @@ public class HumanPlayer extends Player {
 	 */
 	@Override
 	public Board makeYourMove() {
-		this.moveindex=gameView.getHumanInput(currentBoard,myMoves, amIWhite);
-		if (moveindex != -1) return myMoves.get(moveindex).getBoard();
-		else return null;
+		//first loop: wait for semantically correct move
+		do {
+			Position[] movepos;
+			//second loop: wait for feedback from view (esp. for swing view)
+			do {
+				movepos = gameView.getHumanInput(currentBoard, myMoves, amIWhite); //returns null if no input there yet; returns [0]null,[1]null if cancelled; returns semantically correct move otherwise
+				if (movepos == null) try { Thread.sleep(Consts.wait4input);} catch (InterruptedException e) { /*cancel*/ movepos= new Position[2]; movepos[0] = null;};
+			} while (movepos == null); 
+			//test if cancelled
+			if  (movepos[0]==null) return null;
+			//test if move is semantically correct
+			for (int i=0; i<myMoves.size(); i++) {
+				if (myMoves.get(i).getStartpos().equals(movepos[0]) &&
+						myMoves.get(i).getTargetpos().equals(movepos[1])) {
+						moveindex=i;
+						return myMoves.get(moveindex).getBoard();
+				}
+			}
+		} while (true); //breaks and returns before
 	}
-
 }

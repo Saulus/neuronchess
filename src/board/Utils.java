@@ -86,6 +86,7 @@ public final class Utils {
 			case 'f': horizontal = 5;break;
 			case 'g': horizontal = 6;break;
 			case 'h': horizontal = 7;break;
+			default: horizontal = -1;break;
 		}
 		switch (place.toLowerCase().charAt(1)) {
 			case '1': vertical = 0;break;
@@ -96,7 +97,9 @@ public final class Utils {
 			case '6': vertical = 5;break;
 			case '7': vertical = 6;break;
 			case '8': vertical = 7;break;
+			default: vertical = -1;break;
 		}
+		if (horizontal==-1 || vertical==-1) return null;
 		figurepos = new Position(horizontal,vertical);
 		return figurepos;
 	}

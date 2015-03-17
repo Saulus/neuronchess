@@ -172,53 +172,57 @@ public class TextView extends View {
 			}
 		}
 		
-		//usermove must be something like "Sa1 b1" or "Sa1b1" or "Sb1" or "a1b1"
-		public int getHumanInput (Board board, List<Move> possibleMoves, boolean forWhite) {
+		// usermove must be something like "Sa1 b1" or "Sa1b1" or "Sb1" or "a1b1"
+	 	// returns array of oldposition, newposition
+	 	// tests for syntactical correctness
+	 	//player needs to test for move semantical correctness
+		public Position[] getHumanInput (Board board, List<Move> possibleMoves, boolean forWhite) {
+			Position[] mypositions = new Position[2];
 			String color = (forWhite) ? "WEISS" : "SCHWARZ";
-			 String usermove= null;
-			 int mymoveindex = -1;
+			String usermove= null;
 			 boolean isCorrect = false;
 			 boolean isCancel = false;
 			 do {
+				 mypositions[0] = null;
+				 mypositions[1] = null;
 				 System.out.print("Dein Zug für "+color+" (e für Ende): ");
-				 while (humanMove==null) { try {Thread.sleep(200);} catch (InterruptedException e) {} }
+				 while (humanMove==null) { //wait until move was filled from main input process 
+					 try {Thread.sleep(Consts.wait4input);} catch (InterruptedException e) {humanMove = "e"; } }
 				 usermove = humanMove;
 				 humanMove=null;
 				 usermove = usermove.replaceAll("\\s","").toLowerCase();
 				 if (usermove.equals("e")) isCancel = true;
-				 else if (usermove.length() == 3 || usermove.length() == 4 || usermove.length() == 5) {
+				 else if (usermove.length() == 4 || usermove.length() == 5) {
 					 //old and new Position
 					 int startMove1 = 0;
 					 int startMove2 = 0;
-					 if (usermove.length() == 5) startMove1 = 1;
-					 if (usermove.length() == 3) startMove2 = 1; else startMove2 = startMove1+2;
-					 Position oldposition = Utils.whichPosition(usermove.substring(startMove1,startMove1+2));
-					 Position newposition = Utils.whichPosition(usermove.substring(startMove2,startMove2+2));
-					 //figure type
-					 byte figuretype; 
-					 if (usermove.length() == 4) {
-						 figuretype = board.whoIsOnField(oldposition);
-					 } else {
-						 figuretype = Utils.whichFigureType(usermove.substring(0,1));
+					 if (usermove.length() == 5) startMove1 = 1; 
+					 startMove2 = startMove1+2;
+					 mypositions[0] = Utils.whichPosition(usermove.substring(startMove1,startMove1+2));
+					 mypositions[1] = Utils.whichPosition(usermove.substring(startMove2,startMove2+2));
+					 isCorrect = (mypositions[0]!=null && mypositions[1]!=null);
+					//if length 5 test figure type 
+					 if (usermove.length() == 5) {
+						 byte figuretype = Utils.whichFigureType(usermove.substring(0,1));
 						 if (forWhite) figuretype=(byte) (figuretype*Consts.whiteFigure); else figuretype=(byte) (figuretype*Consts.blackFigure);
-					 }
-					//test if Move is correct
-					 for (int i=0; i<possibleMoves.size(); i++) {
+						 isCorrect = isCorrect && (board.whoIsOnField(mypositions[0])==figuretype);
+					 };
+				 } else if (usermove.length() == 3) { //search for correct positions if input is "BA4"
+					mypositions[1] = Utils.whichPosition(usermove.substring(1,3));
+					byte figuretype = Utils.whichFigureType(usermove.substring(0,1));
+				 	if (forWhite) figuretype=(byte) (figuretype*Consts.whiteFigure); else figuretype=(byte) (figuretype*Consts.blackFigure);
+					for (int i=0; i<possibleMoves.size(); i++) {
 							if (possibleMoves.get(i).getFiguretype() == figuretype &&
-								//either both positions are correct
-								((possibleMoves.get(i).getStartpos().equals(oldposition) &&
-								possibleMoves.get(i).getTargetpos().equals(newposition)) ||
-								//or new position is correct and inputlength
-								(usermove.length() == 3 && possibleMoves.get(i).getTargetpos().equals(newposition)))) {
-								mymoveindex=i;
+									possibleMoves.get(i).getTargetpos().equals( mypositions[1])) {
+								mypositions[0] =possibleMoves.get(i).getStartpos();
 								isCorrect = true;
 								break;
 							}
 					 }
 				 }	
-				 if ((!isCorrect) && (!isCancel)) System.out.println("Zug nicht möglich");
+				 if ((!isCorrect) && (!isCancel)) System.out.println("Zug syntaktisch falsch");
 			 } while ((!isCorrect) && (!isCancel));
-			 return mymoveindex;
+			 return mypositions;
 		}
 		
 		public void drawEnd(int gamenumber, boolean isDraw, int whoHasWon, boolean isWinnerWhite, String winnerName) {

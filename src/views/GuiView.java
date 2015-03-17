@@ -17,6 +17,7 @@ import java.util.List;
 import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -30,6 +31,7 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 import javax.swing.SwingConstants;
+import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
@@ -64,8 +66,12 @@ public class GuiView extends View {
     
     private boolean humanMoveAwaitingWhite = false;
     private boolean humanMoveAwaitingBlack = false;
-    private Position humanMoveStart=null;
-    private Position humanMoveTarget=null;
+    private JButton humanMoveStart=null;
+    private JButton humanMoveTarget=null;
+    
+    private Border stdborder;
+    private Border highlightborderWhite = BorderFactory.createLineBorder(Color.green);
+    private Border highlightborderBlack = BorderFactory.createLineBorder(Color.red);
 	
 
 	public GuiView() {
@@ -206,7 +212,7 @@ public class GuiView extends View {
 	        //first: the board action
 	        Action chessboardaction = new AbstractAction() {
 	            public void actionPerformed(ActionEvent e) {
-	            	setHumanMove(((JButton) e.getSource()).getToolTipText());
+	            	setHumanMove(((JButton) e.getSource()));
 	            }
 	        };
 	        Insets buttonMargin = new Insets(0, 0, 0, 0);
@@ -232,6 +238,8 @@ public class GuiView extends View {
 	                chessBoardSquares[ii][jj] = b;
 	            }
 	        }
+	        //set Standard Border of chessboard buttons
+	        stdborder = chessBoardSquares[0][0].getBorder();
 
 	        /*
 	         * fill the chess board
@@ -312,25 +320,29 @@ public class GuiView extends View {
 	 }
 	 
 	 //sets the human move; tests only for correctness regarding the tooltip of selected button
-	 private void setHumanMove(String strpos) {
+	 private void setHumanMove(JButton b) {
 		 if (humanMoveAwaitingWhite || humanMoveAwaitingBlack) {
+			 String strpos=b.getToolTipText();
 			 strpos.toLowerCase();
-			 if (humanMoveStart == null && strpos.length() == 4) { //needs start choice
-				 if (strpos.substring(0,1).equals("w") && humanMoveAwaitingWhite) 
-					 humanMoveStart = Utils.whichPosition(strpos.substring(2,4)); 
-				 else
-				 if (strpos.substring(0,1).equals("s") && humanMoveAwaitingBlack)
-						 humanMoveStart = Utils.whichPosition(strpos.substring(2,4)); 
-			 } else
-			 if (humanMoveTarget == null) {
-				if (strpos.length() == 4) {
-					if (strpos.substring(0,1).equals("w") && humanMoveAwaitingBlack) 
-						humanMoveTarget = Utils.whichPosition(strpos.substring(2,4)); 
-					 else
-					 if (strpos.substring(0,1).equals("s") && humanMoveAwaitingWhite)
-						 humanMoveTarget = Utils.whichPosition(strpos.substring(2,4)); 
-				}
-				else  humanMoveTarget = Utils.whichPosition(strpos.substring(0,2)); 
+			 //if figure selected
+			 if (strpos.length() == 4) {
+				 //always deselect target
+				 if (humanMoveTarget!=null) { humanMoveTarget.setBorder(stdborder); humanMoveTarget = null; }
+				 //either it is mine = new start move
+				 boolean ismine = ((strpos.substring(0,1).equals("w") && humanMoveAwaitingWhite) || (strpos.substring(0,1).equals("s") && humanMoveAwaitingBlack));
+				 if (ismine) {
+					 if (humanMoveStart!=null) humanMoveStart.setBorder(stdborder); 
+					 humanMoveStart = b;  
+					 if (humanMoveAwaitingWhite) b.setBorder(highlightborderWhite); else b.setBorder(highlightborderBlack);
+				 } else if (humanMoveStart!=null) {
+					 //or it is not mine = can only be target
+					 humanMoveTarget = b;
+					 if (humanMoveAwaitingWhite) b.setBorder(highlightborderWhite); else b.setBorder(highlightborderBlack);
+				 }
+			 } else if (humanMoveStart!=null) {
+				 if (humanMoveTarget!=null) { humanMoveTarget.setBorder(stdborder); humanMoveTarget = null; }
+				 humanMoveTarget = b;
+				 if (humanMoveAwaitingWhite) b.setBorder(highlightborderWhite); else b.setBorder(highlightborderBlack);
 			 }
 		 }
 	 }
@@ -368,33 +380,24 @@ public class GuiView extends View {
 			}
 		}
 
-		//returns moveindex
-		public int getHumanInput (Board board, List<Move> possibleMoves, boolean forWhite) {
-			int ret=0;
-			boolean correct = false;
-			do {
-				if (forWhite) humanMoveAwaitingWhite=true; else humanMoveAwaitingBlack = true;
-				while (humanMoveStart == null || humanMoveTarget == null) {
-					//wait for input to happen
-				}
-				humanMoveAwaitingWhite=false;
-				humanMoveAwaitingBlack = false;
-				byte figuretype = board.whoIsOnField(humanMoveStart);
-				//test if Move is correct
-				 for (int i=0; i<possibleMoves.size(); i++) {
-						if (possibleMoves.get(i).getFiguretype() == figuretype &&
-							//either both positions are correct
-							possibleMoves.get(i).getStartpos().equals(humanMoveStart) &&
-							possibleMoves.get(i).getTargetpos().equals(humanMoveTarget)) {
-							ret=i;
-							correct=true;
-							break;
-						}
-				 }
-				humanMoveStart = null;
-				humanMoveTarget = null;
-			} while (!correct);
-			return ret;
+
+	 	// returns array of oldposition, newposition
+	 	// tests for syntactical correctness
+	 	//player needs to test for move semantical correctness
+		public Position[]  getHumanInput (Board board, List<Move> possibleMoves, boolean forWhite) {
+			if (forWhite) humanMoveAwaitingWhite=true; else humanMoveAwaitingBlack = true;
+			if (humanMoveStart == null || humanMoveTarget == null) return null;
+			humanMoveAwaitingWhite = false;
+			humanMoveAwaitingBlack =false;
+			String strpos1 = humanMoveStart.getToolTipText().substring(2); //always with piece on it
+			String strpos2 = humanMoveTarget.getToolTipText();
+			if (strpos2.length()==4) strpos2 = strpos2.substring(2);
+			Position[] mypositions = {Utils.whichPosition(strpos1),Utils.whichPosition(strpos2)};
+			humanMoveStart.setBorder(stdborder);
+			humanMoveStart = null;
+			humanMoveTarget.setBorder(stdborder);
+			humanMoveTarget = null;
+			return mypositions;
 		}
 
 		public void drawEnd(int gamenumber, boolean isDraw, int whoHasWon, boolean isWinnerWhite, String winnerName) {
@@ -494,6 +497,10 @@ public class GuiView extends View {
 		super.cancel();
 		statusmessage.setText("Cancelled");
 		clearBoard();
+		humanMoveAwaitingWhite = false;
+		humanMoveAwaitingBlack =false;
+		if (humanMoveStart!=null) {humanMoveStart.setBorder(stdborder); humanMoveStart = null; }
+		if (humanMoveTarget!=null) {humanMoveTarget.setBorder(stdborder); humanMoveTarget = null; }
 	}
 
 }

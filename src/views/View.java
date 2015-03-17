@@ -20,6 +20,7 @@ import models.UniformModel;
 import board.Board;
 import board.Game;
 import board.Move;
+import board.Position;
 import board.Utils;
 
 public abstract class View {
@@ -151,8 +152,10 @@ public abstract class View {
 
 	public abstract void drawMove (Move move, boolean amIWhite, int movenumber) ;
 
-	//returns moveindex
-	public abstract int getHumanInput (Board board, List<Move> possibleMoves, boolean forWhite) ;
+	//returns null if no input there yet; returns [0]null,[1]null if cancelled;
+	// returns semantically correct move otherwise
+	//in form of: oldposition, newposition (no test for semantic correctness)
+	public abstract Position[] getHumanInput (Board board, List<Move> possibleMoves, boolean forWhite) ;
 
 	public abstract void drawEnd(int gamenumber, boolean isDraw, int whoHasWon, boolean isWinnerWhite, String winnerName);
 

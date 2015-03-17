@@ -28,7 +28,7 @@ public class LogRegModel extends Model {
 	private double lambda = 0.1; //regularization parameter
 	private double threshold = 0.0001; //threshold for stopping learning
 	
-	private final ReadWriteLock  lock      = new ReentrantReadWriteLock();
+	private final ReadWriteLock lock      = new ReentrantReadWriteLock();
 	private final Lock           readLock  = lock.readLock(), writeLock = lock.writeLock();
 	
 	
