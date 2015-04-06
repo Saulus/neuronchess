@@ -9,6 +9,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
+import board.Board;
 import static org.nd4j.linalg.ops.transforms.Transforms.*;
 import main.Consts;
 
@@ -107,9 +108,9 @@ public class LogRegModel extends Model {
 	}
 
 	
-	public double willWhiteWin(byte[][] boardmatrix, boolean isWhiteOn) {
+	public double willWhiteWin(Board board, boolean isWhiteOn, int movenumber) {
 		//create feature column vector
-		INDArray features =  createFeatureVector(boardmatrix,isWhiteOn);
+		INDArray features =  createFeatureVector(board.getBoardmatrix(),isWhiteOn);
 		INDArray predict;
 		readLock.lock();
 		try {
@@ -123,17 +124,17 @@ public class LogRegModel extends Model {
 		return predict.getDouble(0);
 	}
 	
-	public void learn(List<byte[][]> allMatrixes, boolean didWhiteStart, boolean didWhiteWin) {
+	public void learn(List<Board> allBoards, boolean didWhiteStart, boolean didWhiteWin) {
 		//Mini Batch Gradient Descent
 		//targets
 		INDArray targets;
 		if (didWhiteWin)
-			targets = Nd4j.ones(allMatrixes.size(),1);
-		else targets = Nd4j.zeros(allMatrixes.size(),1);
+			targets = Nd4j.ones(allBoards.size(),1);
+		else targets = Nd4j.zeros(allBoards.size(),1);
 		List<INDArray> featureList = new ArrayList<INDArray>();
 		//work through boards
-		for (byte[][] nextboard : allMatrixes) {
-			featureList.add(createFeatureVector(nextboard,didWhiteStart));
+		for (Board nextboard : allBoards) {
+			featureList.add(createFeatureVector(nextboard.getBoardmatrix(),didWhiteStart));
 			didWhiteStart = !didWhiteStart;
 		}
 		INDArray features = Nd4j.create(featureList,new int[]{featureList.size(),featureList.get(0).size(0)});

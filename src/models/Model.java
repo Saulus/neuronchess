@@ -7,6 +7,8 @@ import main.Consts;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
+import board.Board;
+
 public abstract class Model implements java.io.Serializable {
 	/**
 	 * 
@@ -39,10 +41,10 @@ public abstract class Model implements java.io.Serializable {
 	}
 	
 	//to be overwritten by Child-Class
-	public abstract double willWhiteWin(byte[][] boardmatrix, boolean isWhiteOn);
+	public abstract double willWhiteWin(Board board, boolean isWhiteOn, int movenumber);
 	
 	//to be overwritten by Child-Class
-	public abstract void learn(List<byte[][]> allMatrixes, boolean didWhiteStart, boolean didWhiteWin);
+	public abstract void learn(List<Board> allBoards, boolean didWhiteStart, boolean didWhiteWin);
 	
 	public String getName() {
 		return name;

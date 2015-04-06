@@ -53,7 +53,7 @@ public abstract class Player {
 	}
 	
 	//to be overwritten by Child-Class
-	public abstract Board makeYourMove();
+	public abstract Board makeYourMove(int movenumber);
 	
 	public boolean areYouWhite() {
 		return amIWhite;

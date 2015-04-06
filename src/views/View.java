@@ -14,9 +14,7 @@ import javax.swing.SwingUtilities;
 
 import players.Player;
 import main.Consts;
-import models.LogRegModel;
-import models.Model;
-import models.UniformModel;
+import models.*;
 import board.Board;
 import board.Game;
 import board.Move;
@@ -97,6 +95,10 @@ public abstract class View {
 			}
 		}
 	
+	 /*
+	  * Load models; if not yet present, create (and init) new model
+	  * Cave: Add per new Model type
+	  */
 	 protected String loadModels() {
 		String ret ="";
 		models.clear();
@@ -111,9 +113,10 @@ public abstract class View {
 		         in.close();
 		         fileIn.close();
 		         ret = "Modelle geladen";
-		      }catch(Exception e) {
+		      }catch(Exception e) { //add here per model type
 		    	 if (s.equals(UniformModel.name)) m = new UniformModel();
 		    	 if (s.equals(LogRegModel.name)) m = new LogRegModel();
+		    	 if (s.equals(LogRegModelExt.name)) m = new LogRegModelExt();
 		    	 ret = "Fehler beim Laden; Modelle neu initialisiert.";
 		      }	finally {
 		    	  if (fileIn != null) try { fileIn.close(); } catch (IOException e) {}

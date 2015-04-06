@@ -496,7 +496,7 @@ public class GuiView extends View {
 	protected void cancel () {
 		super.cancel();
 		statusmessage.setText("Cancelled");
-		clearBoard();
+		//clearBoard();
 		humanMoveAwaitingWhite = false;
 		humanMoveAwaitingBlack =false;
 		if (humanMoveStart!=null) {humanMoveStart.setBorder(stdborder); humanMoveStart = null; }

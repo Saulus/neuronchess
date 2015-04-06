@@ -62,7 +62,7 @@ public class Game extends Thread {
 			if (isOn == player1) movenumber++;
 			isOn.yourNewPosition(board);
 			if (isOn.canYouMove()) {
-				board = isOn.makeYourMove();
+				board = isOn.makeYourMove(movenumber);
 				if (board == null) this.interrupt();
 				else {
 					if (isOn.whatIsYourMove().getFiguretype() == Consts.bauerNumber || isOn.whatIsYourMove().knockedOff() != 0) countmoves = 0;
@@ -179,14 +179,6 @@ public class Game extends Thread {
 		return allPositions;
 	}
 	
-	public List<byte[][]> getAllBoardmatrixes() {
-		List<byte[][]> allMatrixes = new ArrayList<byte[][]>();
-		for (Board board : this.getAllPositions()) {
-			allMatrixes.add(board.getBoardmatrix());
-		}
-		return allMatrixes;
-	}
-	
 	public Player getPlayer1 () {
 		return player1;
 	}
@@ -196,10 +188,7 @@ public class Game extends Thread {
 	}
 	
 	private void learn (Player pl) {
-		
-			 pl.getChessmodel().learn(getAllBoardmatrixes(), pl.areYouWhite(), resultWhiteHasWon());
-		  
-
+			 pl.getChessmodel().learn(getAllPositions(), pl.areYouWhite(), resultWhiteHasWon());
 	}
 	
 

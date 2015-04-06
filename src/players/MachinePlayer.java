@@ -50,7 +50,7 @@ public class MachinePlayer extends Player {
 	 * @see Player#makeYourMove()
 	 */
 	@Override
-	public Board makeYourMove() {
+	public Board makeYourMove(int movenumber) {
 		//random number for selection of Top3
 		double randomfloat = Math.random();
 		Pair[] probs;
@@ -58,7 +58,7 @@ public class MachinePlayer extends Player {
 			//Get probabilities per new Position
 			probs = new Pair[this.myMoves.size()]; //
 			for (int i=0; i<this.myMoves.size(); i++) {
-				probs[i] = new Pair(i, chessmodel.willWhiteWin(this.myMoves.get(i).getBoardmatrix(),!this.amIWhite),!this.amIWhite);
+				probs[i] = new Pair(i, chessmodel.willWhiteWin(this.myMoves.get(i).getBoard(),!this.amIWhite,movenumber),!this.amIWhite);
 			}
 			//sort
 			Arrays.sort(probs);

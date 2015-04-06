@@ -27,7 +27,7 @@ public class HumanPlayer extends Player {
 	 * @see Player#makeYourMove()
 	 */
 	@Override
-	public Board makeYourMove() {
+	public Board makeYourMove(int movenumber) {
 		//first loop: wait for semantically correct move
 		do {
 			Position[] movepos;

@@ -47,7 +47,7 @@ public final class Consts {
 	
 	
 	//Model constants
-	public static final String[] modeltypes = {"uniform","logreg"};
+	public static final String[] modeltypes = {"uniform","logreg","logregext"}; //add here per model type (add also in loadModels in View class)
 	public static final int typeFiguresAsValues = 1; //model type
 	public static final int typeFiguresAsMatrixes = 2; //model type
 		

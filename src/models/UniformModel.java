@@ -1,6 +1,8 @@
 package models;
 import java.util.List;
 
+import board.Board;
+
 /**
  * 
  */
@@ -23,12 +25,12 @@ public class UniformModel extends Model {
 		super(0);
 	}
 	
-	public double willWhiteWin(byte[][] boardmatrix, boolean isWhiteOn) {
+	public double willWhiteWin(Board board, boolean isWhiteOn, int movenumber) {
 		double randomfloat = Math.random();
 		return randomfloat;
 	}
 	
-	public void learn(List<byte[][]> allMatrixes, boolean didWhiteStart, boolean didWhiteWin) {
+	public void learn(List<Board> allBoards, boolean didWhiteStart, boolean didWhiteWin) {
 		//do nothing
 		
 	}
