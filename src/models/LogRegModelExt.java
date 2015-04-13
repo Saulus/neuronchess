@@ -22,7 +22,7 @@ public class LogRegModelExt extends Model {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 3L;
 	public static final String name = "logregext";
 	
 	private INDArray thetasopening; //first 10 moves
@@ -73,20 +73,13 @@ public class LogRegModelExt extends Model {
 	private INDArray calcGradient (INDArray features, INDArray targets, INDArray thetas) {
 		int m = targets.size(0); //number of examples
 		INDArray grad;
-		readLock.lock();
-		try {
-			INDArray h=sigmoid(features.mmul(thetas)); //hypothesis=prediction
-			grad= features.transpose().mmul(h.subi(targets)).muli((double)1/m); //grad = 1/m * X'*(h-y);
-			//add regularization
-			double biasgrad = grad.getDouble(0); //dont want to regularize intercept
-			grad = grad.add(thetas.mul((double)lambda*1/m));
-			grad.putScalar(0, biasgrad);
-			//grad(2:end,:) =  grad(2:end,:) + 1/m * lambda * theta(2:end,:);
-		}
-		finally {
-			readLock.unlock();
-		}
-		
+		INDArray h=sigmoid(features.mmul(thetas)); //hypothesis=prediction
+		grad= features.transpose().mmul(h.subi(targets)).muli((double)1/m); //grad = 1/m * X'*(h-y);
+		//add regularization
+		double biasgrad = grad.getDouble(0); //dont want to regularize intercept
+		grad = grad.add(thetas.mul((double)lambda*1/m));
+		grad.putScalar(0, biasgrad);
+		//grad(2:end,:) =  grad(2:end,:) + 1/m * lambda * theta(2:end,:);
 		return grad;
 	}
 	
@@ -94,26 +87,19 @@ public class LogRegModelExt extends Model {
 	private double calcCosts (INDArray features, INDArray targets, INDArray thetas) {
 		int m = targets.size(0); //number of examples
 		double costs;
-		readLock.lock();
-		try {
-			INDArray h=sigmoid(features.mmul(thetas)); //hypothesis=prediction
-		
-			INDArray einzen = Nd4j.ones(m,1);
-			
-			INDArray part1 = targets.transpose().mmul(log(h));  //y'*log(h)
-			INDArray part2 = einzen.sub(targets).transpose().mmul(log(einzen.sub(h))); //(1-y)'*log(1-h) 
-			
-			//J=1/m * (-y'*log(h)-(1-y)'*log(1-h)) 
-			costs = (-part1.getDouble(0)-part2.getDouble(0))/m;
-			
-			//add regularization
-			costs = costs + (double) (pow(thetas,2).sum(0).getDouble(0)-Math.pow(thetas.getDouble(0),2))*1/m*1/2;
-			//+ 1/2 *1/m * lambda * sum(theta(2:end,:).^2);
-		}
-		finally {
-			readLock.unlock();
-		}
-		
+		INDArray h=sigmoid(features.mmul(thetas)); //hypothesis=prediction
+
+		INDArray einzen = Nd4j.ones(m,1);
+
+		INDArray part1 = targets.transpose().mmul(log(h));  //y'*log(h)
+		INDArray part2 = einzen.sub(targets).transpose().mmul(log(einzen.sub(h))); //(1-y)'*log(1-h) 
+
+		//J=1/m * (-y'*log(h)-(1-y)'*log(1-h)) 
+		costs = (-part1.getDouble(0)-part2.getDouble(0))/m;
+
+		//add regularization
+		costs = costs + (double) (pow(thetas,2).sum(0).getDouble(0)-Math.pow(thetas.getDouble(0),2))*1/m*1/2;
+		//+ 1/2 *1/m * lambda * sum(theta(2:end,:).^2);
 		return costs;
 	}
 
@@ -125,9 +111,9 @@ public class LogRegModelExt extends Model {
 		readLock.lock();
 		try {
 			//Prediction: sigmoid(X*theta)
-			if (movenumber <= openingNoMoves) predict = sigmoid(features.mmul(thetasopening.get()));
-			else if (board.howManyFiguresAreLeft() <= endgameNoFigures) predict = sigmoid(features.mmul(thetasendgame.get()));
-			else predict = sigmoid(features.mmul(thetasmiddle.get()));
+			if (movenumber <= openingNoMoves) predict = sigmoid(features.mmul(thetasopening));
+			else if (board.howManyFiguresAreLeft() <= endgameNoFigures) predict = sigmoid(features.mmul(thetasendgame));
+			else predict = sigmoid(features.mmul(thetasmiddle));
 		}
 		finally {
 			readLock.unlock();
@@ -147,21 +133,15 @@ public class LogRegModelExt extends Model {
 		//learning: change thetas acc. gradient
 		double curcosts = 50000;
 		double newcosts = 0; 
-		writeLock.lock();
-		try {
-			for (int i=1; i<=iterations;i++) {
-				thetas=thetas.get().subi(calcGradient(features, targets,thetas.get()).muli(alpha));
-				//test costs every 5th iteration
-				if ( (i % 5) == 0) { 
-					newcosts=calcCosts(features, targets,thetas.get());
-					if (newcosts+threshold>=curcosts) break;
-					curcosts = newcosts;
-					//System.out.println(i+" Kosten: "+curcosts); //debug
-				}
+		for (int i=1; i<=iterations;i++) {
+			thetas=thetas.subi(calcGradient(features, targets,thetas).muli(alpha));
+			//test costs every 5th iteration
+			if ( (i % 5) == 0) { 
+				newcosts=calcCosts(features, targets,thetas);
+				if (newcosts+threshold>=curcosts) break;
+				curcosts = newcosts;
+				//System.out.println(i+" Kosten: "+curcosts); //debug
 			}
-		}
-		finally {
-			writeLock.unlock();
 		}
 	}
 	
@@ -177,9 +157,18 @@ public class LogRegModelExt extends Model {
 			else featureListMiddle.add(createFeatureVector(allBoards.get(i).getBoardmatrix(),didWhiteStart));
 			didWhiteStart = !didWhiteStart;
 		}
-		if (featureListOpening.size()>0) learnHelper (featureListOpening,didWhiteWin,thetasopening);
-		if (featureListMiddle.size()>0) learnHelper (featureListMiddle,didWhiteWin,thetasmiddle);
-		if (featureListEndgame.size()>0)learnHelper (featureListEndgame,didWhiteWin,thetasendgame);
+		if (featureListOpening.size()>0) {
+			writeLock.lock();
+			try { learnHelper (featureListOpening,didWhiteWin,thetasopening);} finally {writeLock.unlock();}
+		}
+		if (featureListMiddle.size()>0) {
+			writeLock.lock();
+			try { learnHelper (featureListMiddle,didWhiteWin,thetasmiddle);} finally {writeLock.unlock();}
+		}
+		if (featureListEndgame.size()>0) {
+			writeLock.lock();
+			try { learnHelper (featureListEndgame,didWhiteWin,thetasendgame);} finally {writeLock.unlock();}
+		}
 	}
 	
 

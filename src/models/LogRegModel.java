@@ -19,7 +19,7 @@ public class LogRegModel extends Model {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 4L;
 	public static final String name = "logreg";
 	
 	private INDArray thetas;
@@ -63,20 +63,32 @@ public class LogRegModel extends Model {
 	private INDArray calcGradient (INDArray features, INDArray targets, INDArray thetas) {
 		int m = targets.size(0); //number of examples
 		INDArray grad;
-		readLock.lock();
+		//DEBUG
+		INDArray d = null;
+		INDArray h = null;
 		try {
-			INDArray h=sigmoid(features.mmul(thetas)); //hypothesis=prediction
-			grad= features.transpose().mmul(h.subi(targets)).muli((double)1/m); //grad = 1/m * X'*(h-y);
-			//add regularization
-			double biasgrad = grad.getDouble(0); //dont want to regularize intercept
-			grad = grad.add(thetas.mul((double)lambda*1/m));
-			grad.putScalar(0, biasgrad);
-			//grad(2:end,:) =  grad(2:end,:) + 1/m * lambda * theta(2:end,:);
-		}
-		finally {
-			readLock.unlock();
+			d = features.mmul(thetas);
+			System.out.println("######################d########################");
+			System.out.println(d.length());
+			h=sigmoid(d);
+			//INDArray h=sigmoid(features.mmul(thetas)); //hypothesis=prediction
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("######################THETAS########################");
+			System.out.println(thetas.toString());
+			System.out.println("######################d########################");
+			System.out.println(d.length());
+			System.out.println(d.toString());
+			System.out.println("######################h########################");
+			System.out.println(h.toString());
 		}
 		
+		grad= features.transpose().mmul(h.subi(targets)).muli((double)1/m); //grad = 1/m * X'*(h-y);
+		//add regularization
+		double biasgrad = grad.getDouble(0); //dont want to regularize intercept
+		grad = grad.add(thetas.mul((double)lambda*1/m));
+		grad.putScalar(0, biasgrad);
+		//grad(2:end,:) =  grad(2:end,:) + 1/m * lambda * theta(2:end,:);
 		return grad;
 	}
 	
@@ -84,26 +96,19 @@ public class LogRegModel extends Model {
 	private double calcCosts (INDArray features, INDArray targets, INDArray thetas) {
 		int m = targets.size(0); //number of examples
 		double costs;
-		readLock.lock();
-		try {
-			INDArray h=sigmoid(features.mmul(thetas)); //hypothesis=prediction
-		
-			INDArray einzen = Nd4j.ones(m,1);
-			
-			INDArray part1 = targets.transpose().mmul(log(h));  //y'*log(h)
-			INDArray part2 = einzen.sub(targets).transpose().mmul(log(einzen.sub(h))); //(1-y)'*log(1-h) 
-			
-			//J=1/m * (-y'*log(h)-(1-y)'*log(1-h)) 
-			costs = (-part1.getDouble(0)-part2.getDouble(0))/m;
-			
-			//add regularization
-			costs = costs + (double) (pow(thetas,2).sum(0).getDouble(0)-Math.pow(thetas.getDouble(0),2))*1/m*1/2;
-			//+ 1/2 *1/m * lambda * sum(theta(2:end,:).^2);
-		}
-		finally {
-			readLock.unlock();
-		}
-		
+		INDArray h=sigmoid(features.mmul(thetas)); //hypothesis=prediction
+
+		INDArray einzen = Nd4j.ones(m,1);
+
+		INDArray part1 = targets.transpose().mmul(log(h));  //y'*log(h)
+		INDArray part2 = einzen.sub(targets).transpose().mmul(log(einzen.sub(h))); //(1-y)'*log(1-h) 
+
+		//J=1/m * (-y'*log(h)-(1-y)'*log(1-h)) 
+		costs = (-part1.getDouble(0)-part2.getDouble(0))/m;
+
+		//add regularization
+		costs = costs + (double) (pow(thetas,2).sum(0).getDouble(0)-Math.pow(thetas.getDouble(0),2))*1/m*1/2;
+		//+ 1/2 *1/m * lambda * sum(theta(2:end,:).^2);
 		return costs;
 	}
 
@@ -115,7 +120,8 @@ public class LogRegModel extends Model {
 		readLock.lock();
 		try {
 			//Prediction: sigmoid(X*theta)
-			predict = sigmoid(features.mmul(thetas.get()));
+			//predict = sigmoid(features.mmul(thetas.get()));
+			predict = sigmoid(features.mmul(thetas));
 		}
 		finally {
 			readLock.unlock();
@@ -145,10 +151,12 @@ public class LogRegModel extends Model {
 		writeLock.lock();
 		try {
 			for (int i=1; i<=iterations;i++) {
-					thetas=thetas.get().subi(calcGradient(features, targets,thetas.get()).muli(alpha));
+					//thetas=thetas.get().subi(calcGradient(features, targets,thetas.get()).muli(alpha));
+					thetas=thetas.subi(calcGradient(features, targets,thetas).muli(alpha));
 				//test costs every 5th iteration
 				if ( (i % 5) == 0) { 
-					newcosts=calcCosts(features, targets,thetas.get());
+					//newcosts=calcCosts(features, targets,thetas.get());
+					newcosts=calcCosts(features, targets,thetas);
 					if (newcosts+threshold>=curcosts) break;
 					curcosts = newcosts;
 					//System.out.println(i+" Kosten: "+curcosts); //debug

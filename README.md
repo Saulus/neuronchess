@@ -17,12 +17,12 @@ German language (don't know why I decided to switch to German).
 Methods implemented:
 - Uniform (benchmark)
 - simple LogReg
+- extended LogReg (3 models: beginning, middle, end)
 
 
 Open points:
 - LogReg spielt schlecht
 	 -> Test: korrekte Sortierung und Auswahl der Moves?
 	 -> Test: Korrektes Lernen? (Mini Batch GD)
-	 -> Aufteilen des Spiels in Anfang/Mitte/Schluss (3x Theta) anhand a)Zugzahl und b)Figurenzahl
 - add further ML
 

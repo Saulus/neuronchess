@@ -81,12 +81,14 @@ public class Game extends Thread {
 			else if (player1.areYouCheckmate()) {
 				whoHasWon = 2;
 				drawEnd();
+				if (player1.areYouAMachine()) learn(player1);
 				if (player2.areYouAMachine()) learn(player2);
 			}
 			else if (player2.areYouCheckmate()) {
 				whoHasWon = 1;
 				drawEnd();
 				if (player1.areYouAMachine()) learn(player1);
+				if (player2.areYouAMachine()) learn(player2);
 			}
 		} else drawCancel();
 	}
@@ -188,7 +190,7 @@ public class Game extends Thread {
 	}
 	
 	private void learn (Player pl) {
-			 pl.getChessmodel().learn(getAllPositions(), pl.areYouWhite(), resultWhiteHasWon());
+			 pl.getChessmodel().learn(getAllPositions(), player1.areYouWhite(), resultWhiteHasWon());
 	}
 	
 
